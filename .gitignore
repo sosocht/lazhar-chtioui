@@ -11,3 +11,5 @@ Thumbs.db
 
 # Sauvegarde des logos avant recadrage (pas utile en prod)
 assets/logos/_originaux-avant-recadrage/
+
+.vercel
