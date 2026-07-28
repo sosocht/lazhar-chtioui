@@ -1,0 +1,13 @@
+# Système / éditeurs
+.DS_Store
+Thumbs.db
+*.log
+
+# Résidus d'outils
+.playwright-cli/
+
+# Vercel (identifiants de projet locaux, ne pas versionner)
+.vercel
+
+# Sauvegarde des logos avant recadrage (pas utile en prod)
+assets/logos/_originaux-avant-recadrage/

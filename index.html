@@ -1,0 +1,967 @@
+  <!DOCTYPE html>
+<!--
+  ====================================================================
+  PORTFOLIO — Lazhar CHTIOUI
+  Page unique (one-page) construite en HTML5 sémantique.
+  Le contenu est 100 % issu du CV (+ infos publiques LinkedIn).
+
+  Fonctionnalités clés :
+   • Hero plein écran (100dvh) avec vraie photo
+   • Compteurs animés au scroll (js/script.js)
+   • Effet « liquid glass » sur la nav et les CTA (filtre SVG + CSS)
+   • Traduction FR / EN / AR avec sélecteur (js/i18n.js) + support RTL
+   • Bandeau de logos « Ils m'ont fait confiance »
+
+  i18n : chaque texte traduisible porte un attribut data-i18n="clé".
+         Le texte écrit en dur ici est le FRANÇAIS (le site reste donc
+         lisible même si le JS ne se charge pas). js/i18n.js fournit EN/AR.
+  ====================================================================
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Anti-flash i18n : applique la langue / `dir` sauvegardée AVANT tout rendu.
+       Sans ça, au refresh sur une section en arabe, la page était d'abord peinte
+       en LTR puis basculée en RTL par applyLang() (DOMContentLoaded) — et si
+       l'animation d'entrée se déclenchait pendant ce basculement, elle partait
+       du mauvais côté. Ici `dir` est correct dès le 1er paint. -->
+  <script>
+    (function () {
+      try {
+        var l = localStorage.getItem("lang");
+        if (l) {
+          document.documentElement.lang = l;
+          document.documentElement.dir = (l === "ar") ? "rtl" : "ltr";
+        }
+      } catch (e) { /* localStorage indisponible : on reste en FR/LTR par défaut */ }
+    })();
+  </script>
+
+  <title>Lazhar Chtioui — Expert Réseau & Datacenter (Cisco ACI)</title>
+  <meta name="description" content="Lazhar Chtioui — Expert réseau & datacenter, spécialiste Cisco ACI. 18 ans d'expérience en infrastructures critiques (Société Générale, SFR, PSA, Tunisie Telecom)." />
+  <meta name="author" content="Lazhar Chtioui" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d4ed8'/%3E%3Ctext x='16' y='23' font-family='Arial,sans-serif' font-size='19' font-weight='bold' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
+
+  <meta property="og:title" content="Lazhar Chtioui — Expert Réseau & Datacenter" />
+  <meta property="og:description" content="24 ans d'expérience en transformation IT, supply chain et management de transition." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Inter + Plus Jakarta Sans (latin) + Noto Sans Arabic (pour la langue AR) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css?v=21" />
+  <!-- Ajustement post-livraison (inline pour rester à jour même en file://). -->
+  <style>
+    .apropos-reveal { min-height: auto !important; border-bottom: 0 !important; padding-top: clamp(5rem, 11vw, 11rem) !important; }
+    section.stats-strip { padding-top: clamp(4rem, 8vw, 7rem) !important; }
+    /* Nom géant Lazhar. Hauteur CALIBRÉE par Sofian : non-F11 (innerH 776) -> 50px ; F11 (864) -> 60px.
+       Interpolation linéaire bornée (clamp) en desktop ; mobile = 40px fixe. font-size 11.35vw car
+       « LAZHAR CHTIOUI » débordait à 12.5vw (texte 1565 > cadre 1423) ; 11.35vw -> texte ~1423 = mêmes marges que Fethi. */
+    .hero3__ghost { translate: 0 40px !important; scale: 1 !important; font-size: clamp(3rem, 11.35vw, 15rem) !important; }
+    @media (min-width: 901px) {
+      .hero3__ghost { translate: 0 clamp(50px, calc(50px + (100dvh - 776px) * 10 / 88), 60px) !important; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ================================================================
+       FILTRE SVG « liquid glass » (invisible).
+       Référencé par le CSS via filter:url(#glass-distortion) pour créer
+       l'effet de verre déformant derrière la nav et les boutons.
+       ================================================================ -->
+  <svg class="glass-svg" aria-hidden="true" focusable="false">
+    <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+      <feTurbulence type="fractalNoise" baseFrequency="0.001 0.005" numOctaves="1" seed="17" result="turbulence" />
+      <feComponentTransfer in="turbulence" result="mapped">
+        <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+        <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+        <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+      </feComponentTransfer>
+      <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+      <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
+        <fePointLight x="-200" y="-200" z="300" />
+      </feSpecularLighting>
+      <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+      <feDisplacementMap in="SourceGraphic" in2="softMap" scale="60" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <!-- ================================================================
+       HEADER / NAVIGATION — pilule flottante en « liquid glass »
+       ================================================================ -->
+  <header class="header" id="top">
+    <div class="conteneur nav-wrap">
+      <div class="nav glass" data-tw="navbar">
+        <a href="#top" class="nav__logo">Lazhar<span>.</span>Chtioui</a>
+
+        <nav class="nav__menu" id="menu" aria-label="Navigation principale">
+          <a href="#apropos"      class="nav__link" data-i18n="nav.about">À propos</a>
+          <a href="#expertise"    class="nav__link" data-i18n="nav.expertise">Expertise</a>
+          <a href="#parcours"     class="nav__link" data-i18n="nav.parcours">Parcours</a>
+          <a href="#realisations" class="nav__link" data-i18n="nav.works">Réalisations</a>
+          <a href="#formation"    class="nav__link" data-i18n="nav.education">Formation</a>
+        </nav>
+
+        <div class="nav__actions">
+          <!-- Sélecteur de langue (FR / EN / AR) -->
+          <div class="lang" id="lang">
+            <button class="lang__btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Choisir la langue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" stroke-linecap="round"/></svg>
+              <span class="lang__current" id="langCurrent">FR</span>
+              <svg class="lang__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <ul class="lang__menu" id="langMenu" role="listbox">
+              <li role="option" data-lang="fr" tabindex="0">🇫🇷 Français</li>
+              <li role="option" data-lang="en" tabindex="0">🇬🇧 English</li>
+              <li role="option" data-lang="ar" tabindex="0">🇸🇦 العربية</li>
+            </ul>
+          </div>
+
+          <a href="#contact" class="btn btn--primaire" data-i18n="nav.contact">Me contacter</a>
+        </div>
+
+        <button class="nav__burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ==============================================================
+         HERO — plein écran (100dvh), composition « signature » : nom géant
+         en fond (rangée haute, pleine largeur), photo ANCRÉE en bas et
+         FIXE (non tweakable — verrouillée), gauche = rôle+intro+CTA,
+         droite = domaines + logos, empilés. Chaque texte est une cible de
+         tweak INDÉPENDANTE (X/Y/Taille séparés).
+         Voir 04-PROJET/06-PORTFOLIO-LAZHAR/CONTEXTE.md.
+         ============================================================== -->
+    <section class="hero" id="accueil">
+
+      <div class="conteneur">
+        <div class="hero3">
+
+          <div class="hero3__main">
+            <!-- Nom géant, en couleur pleine, sur toute la largeur (rangée du haut) -->
+            <h1 class="hero3__ghost heroIn heroIn--top" data-tw="h3-ghost"><span>Lazhar</span> <span class="accent">Chtioui</span></h1>
+
+            <!-- Rôle + intro + CTA (gauche) — 3 cibles de tweak indépendantes -->
+            <div class="hero3__intro heroIn heroIn--left" data-tw="h3-intro">
+              <p class="hero3__lead" data-tw="h3-lead" data-i18n="hero.intro">Bonjour, je suis Lazhar Chtioui, expert réseau & datacenter, passionné par les infrastructures critiques à grande échelle.</p>
+              <a href="#contact" class="btn btn--primaire hero3__cta" data-tw="h3-cta" data-i18n="hero.cta1">Discutons ensemble</a>
+            </div>
+
+            <!-- Photo (centre, ancrée tout en bas du hero, fondue sur les 3 bords sauf le haut).
+                 PAS de data-tw : position fixe, non déplaçable via les tweaks. -->
+            <div class="hero3__photo heroIn heroIn--bottom" data-tw="h3-photo">
+              <img src="assets/portraits/lazhar-hero-cut.webp" alt="Portrait de Lazhar Chtioui, les bras croisés" />
+            </div>
+
+            <!-- Domaines d'expertise + logos (droite) — 2 cibles de tweak indépendantes.
+                 data-tw="h3-intro" (partagé avec le bloc gauche .hero3__intro) : un seul
+                 réglage déplace les DEUX blocs ensemble (X/Y). -->
+            <div class="hero3__side heroIn heroIn--right" data-tw="h3-intro">
+              <!-- Roue façon sélecteur Horloge iOS : défilement 3D en boucle, actif au
+                   centre. La liste ci-dessous est la SOURCE i18n (cachée, jamais affichée
+                   directement) ; js/script.js §9 y lit le texte traduit et l'affiche via
+                   un pool de lignes positionnées en 3D dans .hero3__wheelTrack. -->
+              <div class="hero3__wheel" data-tw="h3-domaines" tabindex="0" role="listbox" aria-label="Domaines d'expertise">
+                <ul class="hero3__wheelSource" hidden>
+                  <li data-i18n="hero.dom1">Transformation IT</li>
+                  <li data-i18n="hero.dom2">Management de Transition</li>
+                  <li data-i18n="hero.dom3">Supply Chain &amp; Logistique</li>
+                  <li data-i18n="hero.dom4">Gouvernance &amp; Pilotage</li>
+                  <li data-i18n="hero.dom5">Pilotage Budgétaire</li>
+                  <li data-i18n="hero.dom6">Systèmes &amp; Data</li>
+                </ul>
+                <div class="hero3__wheelTrack"></div>
+              </div>
+              <div class="hero3__logos" data-tw="h3-logos">
+                <div class="hero3__logosRow">
+                  <div class="hero3__logosGroup" id="heroLogosGroup">
+                    <span class="hero3__logo hero3__logo--count">+3</span>
+                    <span class="hero3__logo"><img src="assets/logos/leclerc.webp" alt="Société Générale" /></span>
+                    <span class="hero3__logo"><img src="assets/logos/laredoute.webp" alt="SFR" /></span>
+                    <span class="hero3__logo"><img src="assets/logos/auchan.webp" alt="PSA Peugeot Citroën" /></span>
+                    <span class="hero3__logo"><img src="assets/logos/boulanger.webp" alt="Orange" /></span>
+                  </div>
+                  <button type="button" class="hero3__logo hero3__logoToggle" aria-expanded="true" aria-controls="heroLogosGroup" aria-label="Afficher / masquer les logos clients">
+                    <img src="assets/logos/casino.webp" alt="Tunisie Telecom" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         STATS — bande de chiffres animés (juste sous le hero)
+         ============================================================== -->
+    <section class="stats-strip">
+      <div class="conteneur hero__stats reveal" data-tw="stats">
+        <div class="stat">
+          <div class="stat__chiffre" data-tw="stats-numbers" data-target="18"><span class="stat__num">0</span><span class="stat__plus">+</span></div>
+          <div class="stat__label" data-i18n="stats.years">Années d'expérience</div>
+        </div>
+        <div class="stat">
+          <div class="stat__chiffre" data-tw="stats-numbers" data-target="6"><span class="stat__num">0</span><span class="stat__plus">+</span></div>
+          <div class="stat__label" data-i18n="stats.roles">Expériences majeures</div>
+        </div>
+        <div class="stat">
+          <div class="stat__chiffre" data-tw="stats-numbers" data-target="6"><span class="stat__num">0</span><span class="stat__plus">+</span></div>
+          <div class="stat__label" data-i18n="stats.people">Collaborateurs managés</div>
+        </div>
+        <div class="stat">
+          <div class="stat__chiffre" data-tw="stats-numbers" data-target="6"><span class="stat__num">0</span><span class="stat__plus">+</span></div>
+          <div class="stat__label" data-i18n="stats.groups">Grands groupes retail</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         À PROPOS
+         ============================================================== -->
+    <section class="section apropos-reveal" id="apropos">
+      <div class="conteneur apropos-reveal__wrap" data-tw="apropos-wrap">
+        <h2 class="apropos-reveal__titre" data-tw="apropos-titre" data-i18n="about.title">Piloter la transformation, avec méthode et impact</h2>
+
+        <!-- Source i18n (cachée) : texte avec **mots-clés** ; script.js §11 la lit et
+             construit .apropos-reveal__texte (un span par mot) pour l'effet de révélation
+             au scroll (gris → foncé, mots-clés en bleu). Reconstruite à chaque langchange. -->
+        <p class="apropos-reveal__src" data-i18n="about.reveal" hidden></p>
+        <p class="apropos-reveal__texte" id="aproposReveal" data-tw="apropos-reveal"></p>
+
+        <!-- Pastilles : liste enroulée en desktop ; en mobile, .apropos__marquee active une
+             BANDE DÉFILANTE (les <li> marqués .is-clone dupliquent la série pour une boucle
+             continue sans couture ; ils sont masqués en desktop). -->
+        <div class="apropos__marquee">
+          <ul class="apropos__points" data-tw="apropos-points">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point1">Direction de programmes IT</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point2">Conduite du changement</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point3">Méthodes agiles &amp; Lean</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point4">Pilotage budgétaire</span></li>
+            <li class="is-clone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point1">Direction de programmes IT</span></li>
+            <li class="is-clone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point2">Conduite du changement</span></li>
+            <li class="is-clone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point3">Méthodes agiles &amp; Lean</span></li>
+            <li class="is-clone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="about.point4">Pilotage budgétaire</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         LOGOS — « Ils m'ont fait confiance »
+         (favicons de repli : remplacez par vos logos HD, mêmes noms)
+         ============================================================== -->
+    <section class="logos">
+      <div class="conteneur">
+        <p class="logos__titre reveal" data-tw="logos-title" data-i18n="logos.title">Ils m'ont fait confiance</p>
+      </div>
+      <div class="logos__viewport reveal" data-tw="logos-track">
+        <div class="logos__track" id="logosTrack">
+          <div class="logos__item"><img src="assets/logos/boulanger.webp" alt="Orange" /></div>
+          <div class="logos__item"><img src="assets/logos/auchan.webp" alt="PSA Peugeot Citroën" /></div>
+          <div class="logos__item"><img src="assets/logos/laredoute.webp" alt="SFR" /></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         EXPERTISE — cartes « Gradient Card » (dégradé + badge + icône)
+         Chaque carte porte data-carte (id 1-6) : au clic, ouvre la
+         modale de détail (#expertiseModal) dans le même dégradé.
+         ============================================================== -->
+    <section class="section expertise" id="expertise">
+      <div class="conteneur">
+        <div class="section-head section-head--filet reveal">
+          <div class="section-head__ligne">
+            <p class="section-eyebrow" data-tw="expertise-eyebrow" data-i18n="expertise.eyebrow">Expertise</p>
+            <span class="section-head__trait" aria-hidden="true"></span>
+          </div>
+          <h2 data-tw="expertise-h2" data-i18n="expertise.title">Des domaines où je crée de la valeur</h2>
+          <p class="section-head__legende" data-tw="expertise-text" data-i18n="expertise.intro">Compétences forgées sur 24 ans de terrain, de la conception à la mise en production.</p>
+        </div>
+
+        <div class="cartes-gradient reveal" data-repeat data-tw="expertise-gradient-cards">
+          <article class="carte-gradient carte-gradient--bleu dir-g" data-carte="1" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="expertiseModal">
+            <div class="carte-gradient__deco" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M12 20V4M20 20v14" stroke-linecap="round"/></svg>
+            </div>
+            <span class="carte-gradient__badge"><span class="carte-gradient__dot"></span>Roadmap IT</span>
+            <h3 data-i18n="expertise.c1t">Transformation IT &amp; Programmes</h3>
+            <p class="carte-gradient__desc" data-i18n="expertise.c1d">Pilotage de roadmaps IT complexes et transverses, direction de programmes, digitalisation des organisations.</p>
+            <span class="carte-gradient__cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </article>
+
+          <article class="carte-gradient carte-gradient--slate dir-h" data-carte="2" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="expertiseModal">
+            <div class="carte-gradient__deco" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-linecap="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round"/></svg>
+            </div>
+            <span class="carte-gradient__badge"><span class="carte-gradient__dot"></span>Management</span>
+            <h3 data-i18n="expertise.c2t">Management &amp; Conduite du changement</h3>
+            <p class="carte-gradient__desc" data-i18n="expertise.c2d">Management d'équipes projet, team building, recrutement et conduite du changement en contexte multi-enseignes.</p>
+            <span class="carte-gradient__cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </article>
+
+          <article class="carte-gradient carte-gradient--emerald dir-d" data-carte="3" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="expertiseModal">
+            <div class="carte-gradient__deco" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <span class="carte-gradient__badge"><span class="carte-gradient__dot"></span>WMS</span>
+            <h3 data-i18n="expertise.c3t">Supply Chain &amp; Logistique</h3>
+            <p class="carte-gradient__desc" data-i18n="expertise.c3d">WMS, PLM, référencement, approvisionnement, stocks, picking, packing, expédition et TMS, de bout en bout.</p>
+            <span class="carte-gradient__cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </article>
+
+          <article class="carte-gradient carte-gradient--amber dir-g" data-carte="4" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="expertiseModal">
+            <div class="carte-gradient__deco" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+            </div>
+            <span class="carte-gradient__badge"><span class="carte-gradient__dot"></span>Budget</span>
+            <h3 data-i18n="expertise.c4t">Pilotage budgétaire &amp; Achats</h3>
+            <p class="carte-gradient__desc" data-i18n="expertise.c4d">Construction et suivi de budgets roulants, appels d'offres RFP/RFQ, négociation de contrats et de prestations.</p>
+            <span class="carte-gradient__cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </article>
+
+          <article class="carte-gradient carte-gradient--indigo dir-b" data-carte="5" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="expertiseModal">
+            <div class="carte-gradient__deco" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </div>
+            <span class="carte-gradient__badge"><span class="carte-gradient__dot"></span>Agile</span>
+            <h3 data-i18n="expertise.c5t">Méthodes Agiles &amp; Gouvernance</h3>
+            <p class="carte-gradient__desc" data-i18n="expertise.c5d">Scrum, Lean, rituels (daily, coordinations), plan de charge, culture du résultat et gouvernance solide.</p>
+            <span class="carte-gradient__cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </article>
+
+          <article class="carte-gradient carte-gradient--navy dir-d" data-carte="6" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="expertiseModal">
+            <div class="carte-gradient__deco" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <span class="carte-gradient__badge"><span class="carte-gradient__dot"></span>ERP</span>
+            <h3 data-i18n="expertise.c6t">Systèmes &amp; Data</h3>
+            <p class="carte-gradient__desc" data-i18n="expertise.c6d">ERP (Nodhos, GénériX, Gold), bases Oracle / PostgreSQL, décisionnel (Business Object, QlikView), CI/CD &amp; cloud.</p>
+            <span class="carte-gradient__cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         PARCOURS — timeline
+         ============================================================== -->
+    <section class="section parcours" id="parcours">
+      <div class="conteneur">
+        <div class="section-head reveal">
+          <div data-tw="parcours-title">
+            <p class="section-eyebrow" data-i18n="parcours.eyebrow">Parcours professionnel</p>
+            <h2 data-i18n="parcours.title">24 ans au service de la transformation</h2>
+          </div>
+        </div>
+
+        <div class="parcours-voie" data-tw="parcours-timeline">
+          <svg class="parcours-voie__trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="parcours-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   style="stop-color:var(--navy)" />
+                <stop offset="100%" style="stop-color:var(--bleu); stop-opacity:.35" />
+              </linearGradient>
+            </defs>
+            <path d="M 6 30 C 14.8 30 14.8 70 23.6 70 C 32.4 70 32.4 30 41.2 30 C 50 30 50 70 58.8 70 C 67.6 70 67.6 30 76.4 30 C 85.2 30 85.2 70 94 70" />
+          </svg>
+
+          <article class="etape etape--actuel etape--pic reveal" style="--x:6%;--y:30%" data-logo="assets/logos/leclerc.webp">
+            <div class="etape__pastille" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="parcoursModal">01</div>
+            <div class="etape__texte">
+              <p class="etape__periode" data-i18n="parcours.p1period">2018 — Auj.</p>
+              <h3 class="etape__poste" data-i18n="parcours.p1title">Expert Réseau ACI &amp; Datacenter</h3>
+              <div class="etape__entreprise">Société Générale</div>
+              <p class="etape__lieu">Île-de-France</p>
+              <p class="etape__desc" data-i18n="parcours.p1desc">Société Générale : design et déploiement des infrastructures datacenter à base de fabric Cisco ACI, migration du legacy (Nexus) vers ACI, fabric multisites (APIC/MSO/NDO), migrations en HNO (programme DCTransfo), support niveau 3, référent technique ACI du Cloud SG et contribution à l'automation (Ansible, Python).</p>
+            </div>
+          </article>
+
+          <article class="etape etape--creux reveal" style="--x:23.6%;--y:70%" data-logo="assets/logos/laredoute.webp">
+            <div class="etape__pastille" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="parcoursModal">02</div>
+            <div class="etape__texte">
+              <p class="etape__periode" data-i18n="parcours.p2period">2012 — 2018</p>
+              <h3 class="etape__poste" data-i18n="parcours.p2title">Expert Réseau &amp; Sécurité</h3>
+              <div class="etape__entreprise">SFR Business</div>
+              <p class="etape__lieu">Courbevoie</p>
+              <p class="etape__desc" data-i18n="parcours.p2desc">SFR Business : référent technique design &amp; architecture de l'équipe Déploiement Réseaux et Sécurité. Backbone intersites IP/MPLS (Alcatel 7750), solutions Cloud (public, privé, hybride), sorties internet sécurisées (F5, Fortinet), load balancing F5 (LTM/GTM), firewalls Fortinet/Checkpoint, POC SDN (Nuage, ACI) et chef de projet du datacenter de Trappes.</p>
+            </div>
+          </article>
+
+          <article class="etape etape--pic reveal" style="--x:41.2%;--y:30%" data-logo="assets/logos/auchan.webp">
+            <div class="etape__pastille" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="parcoursModal">03</div>
+            <div class="etape__texte">
+              <p class="etape__periode" data-i18n="parcours.p3period">2011 — 2012</p>
+              <h3 class="etape__poste" data-i18n="parcours.p3title">Consultant Réseau &amp; Sécurité</h3>
+              <div class="etape__entreprise">PSA Peugeot Citroën</div>
+              <p class="etape__lieu">Île-de-France</p>
+              <p class="etape__desc" data-i18n="parcours.p3desc">PSA Peugeot Citroën : architecture et déploiement d'une solution WLAN Guest sur les sites France/Europe, 802.1X/MAB/Web Auth, DMZ Guest à base de firewalls Palo Alto (portail captif, filtrage URL, LDAP), PRA MPLS/VPN et solution Ucopia pour la gestion des comptes visiteurs.</p>
+            </div>
+          </article>
+
+          <article class="etape etape--creux reveal" style="--x:58.8%;--y:70%" data-logo="assets/logos/casino.webp">
+            <div class="etape__pastille" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="parcoursModal">04</div>
+            <div class="etape__texte">
+              <p class="etape__periode" data-i18n="parcours.p4period">2008 — 2011</p>
+              <h3 class="etape__poste" data-i18n="parcours.p4title">Ingénieur Réseaux Backbone IP</h3>
+              <div class="etape__entreprise">Tunisie Telecom</div>
+              <p class="etape__lieu">Tunis</p>
+              <p class="etape__desc" data-i18n="parcours.p4desc">Tunisie Telecom : design et ingénierie des projets IP/MPLS (Metro Ethernet, couche Edge voix &amp; temps réel, VPN/MPLS entreprises), ingénierie du Core réseau (upgrade des routeurs Cisco 12016 → 12816 IOS XR), rédaction et validation des cahiers des charges du backbone IP.</p>
+            </div>
+          </article>
+
+          <article class="etape etape--pic reveal" style="--x:76.4%;--y:30%" data-logo="assets/logos/generix.webp">
+            <div class="etape__pastille" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="parcoursModal">05</div>
+            <div class="etape__texte">
+              <p class="etape__periode" data-i18n="parcours.p5period">2007 — 2008</p>
+              <h3 class="etape__poste" data-i18n="parcours.p5title">Ingénieur Support Réseaux</h3>
+              <div class="etape__entreprise">SATEC Tunisie</div>
+              <p class="etape__lieu">Tunis</p>
+              <p class="etape__desc" data-i18n="parcours.p5desc">SATEC (Tunisie) : avant-vente et consulting (réponses aux appels d'offres, démonstrations produits, conseil clients) et après-vente (installation d'équipements réseau et sécurité sur site, tests, assistance technique).</p>
+            </div>
+          </article>
+
+          <article class="etape etape--creux reveal" style="--x:94%;--y:70%" data-logo="assets/logos/boulanger.webp">
+            <div class="etape__pastille" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="parcoursModal">06</div>
+            <div class="etape__texte">
+              <p class="etape__periode" data-i18n="parcours.p6period">2007</p>
+              <h3 class="etape__poste" data-i18n="parcours.p6title">Ingénieur — Projet de fin d'études</h3>
+              <div class="etape__entreprise">France Telecom / Orange</div>
+              <p class="etape__lieu">France</p>
+              <p class="etape__desc" data-i18n="parcours.p6desc">France Telecom / Orange Business Services : projet de fin d'études — étude et production d'un réseau IP/MPLS MultiVPN et intégration d'un réseau d'entreprise dans l'application WASAC (IP/MPLS, MP/BGP, VPN/MPLS, QoS, ToIP, OSPF).</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         RÉALISATIONS — projets clés
+         ============================================================== -->
+    <section class="section" id="realisations">
+      <div class="conteneur">
+        <div class="section-head section-head--fiche reveal">
+          <p class="section-eyebrow section-eyebrow--badge" data-i18n="works.eyebrow">Réalisations clés</p>
+          <h2 data-i18n="works.title">Des programmes concrets, livrés</h2>
+          <p data-i18n="works.intro">Une sélection de transformations menées de bout en bout, à fort impact métier.</p>
+        </div>
+
+        <div class="realisations__carousel" data-tw="works-grid">
+          <div class="carousel__track" id="carouselTrack">
+            <article class="projet">
+              <div class="projet__media">
+                <img src="assets/realisations/sd-wan.webp" alt="" loading="lazy" data-tw="works-img-1" />
+                <span class="projet__annee">2025</span>
+              </div>
+              <div class="projet__bottom">
+                <p class="projet__cat" data-i18n="works.w1cat">Réseau &amp; Infrastructure</p>
+                <h3 data-i18n="works.w1title">Migration MPLS → SD-WAN</h3>
+                <p data-i18n="works.w1desc">Transformation du réseau informatique d'un groupe multi-enseignes : Netcenter, refonte LAN/WIFI Cisco Meraki.</p>
+              </div>
+            </article>
+            <article class="projet">
+              <div class="projet__media">
+                <img src="assets/realisations/erp-nodhos.webp" alt="" loading="lazy" data-tw="works-img-2" />
+                <span class="projet__annee">2014</span>
+              </div>
+              <div class="projet__bottom">
+                <p class="projet__cat" data-i18n="works.w2cat">Transformation IT</p>
+                <h3 data-i18n="works.w2title">ERP Nodhos — Centrale d'achat</h3>
+                <p data-i18n="works.w2desc">Refonte du référentiel article, de la Supply Chain amont, de l'offre, du pricing et du stock mutualisé entre filiales.</p>
+              </div>
+            </article>
+            <article class="projet">
+              <div class="projet__media">
+                <img src="assets/realisations/outil-pilotage.webp" alt="" loading="lazy" data-tw="works-img-3" />
+                <span class="projet__annee">2022</span>
+              </div>
+              <div class="projet__bottom">
+                <p class="projet__cat" data-i18n="works.w3cat">Digitalisation NoCode</p>
+                <h3 data-i18n="works.w3title">Outil de pilotage d'ouverture magasin</h3>
+                <p data-i18n="works.w3desc">Application NoCode pilotant le process complet d'ouverture, le budget et le stock de matériel installé.</p>
+              </div>
+            </article>
+            <article class="projet">
+              <div class="projet__media">
+                <img src="assets/realisations/cicd-cloud.webp" alt="" loading="lazy" data-tw="works-img-4" />
+                <span class="projet__annee">2021</span>
+              </div>
+              <div class="projet__bottom">
+                <p class="projet__cat" data-i18n="works.w4cat">DevOps &amp; Cloud</p>
+                <h3 data-i18n="works.w4title">CI/CD &amp; Migration Cloud</h3>
+                <p data-i18n="works.w4desc">Finalisation des chantiers d'intégration continue et migration vers le cloud sur tout le périmètre Commerce.</p>
+              </div>
+            </article>
+            <article class="projet">
+              <div class="projet__media">
+                <img src="assets/realisations/flexplm.webp" alt="" loading="lazy" data-tw="works-img-5" />
+                <span class="projet__annee">2008</span>
+              </div>
+              <div class="projet__bottom">
+                <p class="projet__cat" data-i18n="works.w5cat">Product Lifecycle</p>
+                <h3 data-i18n="works.w5title">FlexPLM — Cycle de vie produit</h3>
+                <p data-i18n="works.w5desc">Optimisation des workflows de développement et harmonisation du sourcing produit inter-enseignes.</p>
+              </div>
+            </article>
+            <article class="projet">
+              <div class="projet__media">
+                <img src="assets/realisations/wms-generix.webp" alt="" loading="lazy" data-tw="works-img-6" />
+                <span class="projet__annee">2004</span>
+              </div>
+              <div class="projet__bottom">
+                <p class="projet__cat" data-i18n="works.w6cat">Supply Chain</p>
+                <h3 data-i18n="works.w6title">Upgrade IP Core</h3>
+                <p data-i18n="works.w6desc">Déploiement d'un système de gestion d'entrepôt : réception, stockage, préparation et expédition.</p>
+              </div>
+            </article>
+          </div>
+
+          <button type="button" class="carousel__next" id="carouselNext" aria-label="Réalisation suivante" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         FORMATION
+         ============================================================== -->
+    <section class="section" id="formation">
+      <div class="conteneur">
+        <div class="section-head section-head--marge reveal">
+          <h2 data-i18n="edu.title">Des fondations d'ingénieur</h2>
+          <div class="section-head__marge">
+            <p class="section-eyebrow" data-i18n="edu.eyebrow">Formation</p>
+            <p data-tw="formation-intro" data-i18n="edu.intro">Un socle scientifique exigeant, moteur d'une carrière tournée vers la résolution de problèmes complexes.</p>
+          </div>
+        </div>
+
+        <div class="formation__layout" data-tw="formation-layout">
+          <div class="formation__visuel reveal">
+            <div class="carousel3d" id="formationCarousel">
+              <div class="carousel3d__stage">
+                <div class="carousel3d__track" id="formationCarouselTrack">
+                  <button type="button" class="carousel3d__face" data-diplome-index="0" data-caption="SUP’COM (Tunis) — Campus" aria-label="Voir en grand : campus de SUP'COM à Tunis">
+                    <img src="assets/arts-et-metiers/campus-aerien.webp" alt="Campus de SUP'COM à Tunis" loading="lazy" draggable="false" />
+                  </button>
+                  <button type="button" class="carousel3d__face" data-diplome-index="0" data-caption="SUP’COM (Tunis) — Vue" aria-label="Voir en grand : vue du campus de SUP'COM à Tunis">
+                    <img src="assets/arts-et-metiers/campus-facade.webp" alt="Vue du campus de SUP'COM" loading="lazy" draggable="false" />
+                  </button>
+                  <button type="button" class="carousel3d__face" data-diplome-index="0" data-caption="SUP’COM (Tunis) — Bâtiment" aria-label="Voir en grand : bâtiment de SUP'COM à Tunis">
+                    <img src="assets/arts-et-metiers/campus-atelier.webp" alt="Bâtiment de SUP'COM" loading="lazy" draggable="false" />
+                  </button>
+                  <button type="button" class="carousel3d__face" data-diplome-index="1" data-caption="Cycle préparatoire (Tunis)" aria-label="Voir en grand : cycle préparatoire aux écoles d'ingénieurs à Tunis">
+                    <img src="assets/lycee-cachan/campus-cachan.webp" alt="Campus du cycle préparatoire" loading="lazy" draggable="false" />
+                  </button>
+                  <button type="button" class="carousel3d__face" data-diplome-index="1" data-caption="Cycle préparatoire (Tunis) — Vue" aria-label="Voir en grand : vue du cycle préparatoire à Tunis">
+                    <img src="assets/lycee-cachan/campus-cachan-2.webp" alt="Vue du campus" loading="lazy" draggable="false" />
+                  </button>
+                  <button type="button" class="carousel3d__face" data-diplome-index="1" data-caption="Cycle préparatoire (Tunis) — Campus" aria-label="Voir en grand : campus du cycle préparatoire à Tunis">
+                    <img src="assets/lycee-medenine/campus-medenine.webp" alt="Campus du cycle préparatoire" loading="lazy" draggable="false" />
+                  </button>
+                </div>
+              </div>
+              <span class="carousel3d__caption" id="formationCarouselCaption"></span>
+              <span class="carousel3d__hint" id="formationCarouselHint" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+              </span>
+            </div>
+            <div class="formation__badge">
+              <img src="assets/logos/ensam.webp" alt="SUP’COM" />
+            </div>
+          </div>
+
+          <div class="formation__grille">
+            <article class="diplome reveal" data-carousel-target="0">
+              <div class="diplome__annee">2004 — 2007</div>
+              <h3 data-i18n="edu.d1title">École Supérieure des Communications de Tunis (SUP’COM)</h3>
+              <p data-i18n="edu.d1desc">Diplôme national d'ingénieur en télécommunications.</p>
+            </article>
+            <article class="diplome reveal" data-carousel-target="3">
+              <div class="diplome__annee">2002 — 2004</div>
+              <h3 data-i18n="edu.d2title">Cycle préparatoire (Tunis)</h3>
+              <p data-i18n="edu.d2desc">Classes préparatoires aux écoles d'ingénieurs.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel3d__lightbox" id="carousel3dLightbox" hidden>
+        <button type="button" class="carousel3d__lightboxClose" id="carousel3dClose" aria-label="Fermer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="carousel3d__lightboxCard">
+          <img class="carousel3d__lightboxImg" id="carousel3dLightboxImg" src="" alt="" />
+          <div class="carousel3d__lightboxText">
+            <p class="carousel3d__lightboxCaption" id="carousel3dLightboxCaption"></p>
+            <h3 class="carousel3d__lightboxTitle" id="carousel3dLightboxTitle"></h3>
+            <p class="carousel3d__lightboxDesc" id="carousel3dLightboxDesc"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================================
+         CONTACT
+         ============================================================== -->
+    <section class="section" id="contact">
+      <div class="conteneur">
+        <div class="contact__banniere reveal" data-tw="contact-banner">
+          <div class="contact__left" data-tw="contact-left">
+            <h2 class="contact__titre" data-tw="contact-title"><span data-i18n="contact.title">Construisons ensemble votre prochaine</span> <em data-i18n="contact.titleEm">transformation</em></h2>
+            <p class="contact__texte" data-tw="contact-text" data-i18n="contact.text">À la recherche de nouveaux défis, je serais ravi de participer au développement de votre entreprise à travers les projets de votre plan de transformation. Échangeons de vive voix.</p>
+            <a href="mailto:lazhar.chtioui@gmail.com" class="btn btn--primaire" data-tw="contact-cta" data-i18n="contact.cta">Me contacter</a>
+          </div>
+
+          <div class="contact__coords" data-tw="contact-coords">
+            <div class="contact__coord">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <a href="mailto:lazhar.chtioui@gmail.com">lazhar.chtioui@gmail.com</a>
+            </div>
+            <div class="contact__coord">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4l2 5-3 2a12 12 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2A18 18 0 0 1 2 6a2 2 0 0 1 2-2Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <a href="tel:+33761448098">+33 7 61 44 80 98</a>
+            </div>
+            <div class="contact__coord">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 11v5M8 8v.01M12 16v-3a2 2 0 0 1 4 0v3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <a href="https://www.linkedin.com/in/lazhar-chtioui-0352a917/" target="_blank" rel="noopener">linkedin.com/in/lazhar-chtioui</a>
+            </div>
+            <div class="contact__coord">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              <a href="https://www.google.com/maps/search/?api=1&amp;query=Armenti%C3%A8res%2C+Hauts-de-France" target="_blank" rel="noopener" data-i18n="contact.location">Armentières, Hauts-de-France</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ================================================================
+       FOOTER
+       ================================================================ -->
+  <footer class="footer">
+    <div class="footer__navy" data-tw="footer-split" aria-hidden="true"></div>
+    <div class="conteneur">
+
+      <div class="footer__block" data-tw="footer-block">
+      <div class="footer__banner" data-tw="footer-banner">
+        <span class="footer__bannerName" data-tw="footer-name">Réseau &amp;<br>Datacenter</span>
+        <img class="footer__bannerPhoto" data-tw="footer-photo" src="assets/portraits/lazhar-footer.webp" alt="Lazhar Chtioui" loading="lazy" />
+      </div>
+
+      <div class="footer__grid" data-tw="footer-grid">
+        <div class="footer__brand" data-tw="footer-brand">
+          <a href="#top" class="footer__brandName">Lazhar<span>.</span>Chtioui</a>
+          <p class="footer__brandDesc" data-i18n="footer.brandDesc">Directeur de programmes &amp; transformations IT — 24 ans à piloter la Supply Chain et la digitalisation des grands groupes.</p>
+          <div class="footer__socials" data-tw="footer-socials">
+            <a href="https://www.linkedin.com/in/lazhar-chtioui-0352a917/" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 11v5M8 8v.01M12 16v-3a2 2 0 0 1 4 0v3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="mailto:lazhar.chtioui@gmail.com" aria-label="E-mail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer__col" data-tw="footer-links">
+          <h4 data-i18n="footer.quickLinks">Liens rapides</h4>
+          <ul>
+            <li><a href="#accueil" data-i18n="footer.home">Accueil</a></li>
+            <li><a href="#apropos" data-i18n="nav.about">À propos</a></li>
+            <li><a href="#expertise" data-i18n="nav.expertise">Expertise</a></li>
+            <li><a href="#parcours" data-i18n="nav.parcours">Parcours</a></li>
+            <li><a href="#realisations" data-i18n="nav.works">Réalisations</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__subscribe" data-tw="footer-subscribe">
+          <h4 data-i18n="footer.subTitle">Restons en contact</h4>
+          <p class="footer__subText" data-i18n="footer.subText">Laissez votre e-mail, je vous recontacte.</p>
+          <form class="footer__subForm" onsubmit="location.href='mailto:lazhar.chtioui@gmail.com?body='+encodeURIComponent('Bonjour, merci de me recontacter à : '+this.email.value);return false;">
+            <input type="email" name="email" required class="footer__subInput" placeholder="Votre e-mail" data-i18n-ph="footer.subPh" aria-label="Votre e-mail" />
+            <button type="submit" class="btn btn--primaire footer__subBtn" data-i18n="footer.subBtn">Envoyer</button>
+          </form>
+          <p class="footer__subFine" data-i18n="footer.subFine">Réponse sous 24 h.</p>
+        </div>
+      </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- SIGNATURE — EXCEPTION après le footer (hors zone verte) : grand nom de famille en entier + copyright dessous. -->
+  <div class="footer-sign">
+    <span class="footer__watermark" data-tw="footer-watermark" aria-hidden="true">Chtioui</span>
+    <div class="footer__bottom" data-tw="footer-copy">
+      <p>© <span id="annee">2026</span> Lazhar Chtioui. <span data-i18n="footer.rights">Tous droits réservés.</span></p>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODALE EXPERTISE — détail d'une carte au clic (voir js/script.js).
+       Une seule modale partagée, son contenu est rempli dynamiquement.
+       ================================================================ -->
+  <div class="expertise-modal" id="expertiseModal" aria-hidden="true">
+    <div class="expertise-modal__overlay" data-expertise-close></div>
+    <div class="expertise-modal__panel" role="dialog" aria-modal="true" aria-labelledby="expertiseModalTitle" tabindex="-1">
+      <button type="button" class="expertise-modal__close" id="expertiseModalCloseBtn" data-expertise-close>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg>
+      </button>
+      <div class="expertise-modal__num" id="expertiseModalNum">01</div>
+      <h3 class="expertise-modal__title" id="expertiseModalTitle"></h3>
+      <p class="expertise-modal__desc" id="expertiseModalDesc"></p>
+      <p class="expertise-modal__examplesLabel" id="expertiseModalExamplesLabel"></p>
+      <ul class="expertise-modal__examples" id="expertiseModalExamples"></ul>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODALE PARCOURS — détail d'une étape au clic sur sa pastille
+       (voir js/script.js). Réutilise le CSS de la modale Expertise ;
+       son contenu est recopié directement depuis l'étape cliquée (déjà
+       traduit dans le DOM), pas besoin de re-passer par I18N.
+       ================================================================ -->
+  <div class="expertise-modal" id="parcoursModal" aria-hidden="true">
+    <div class="expertise-modal__overlay" data-parcours-close></div>
+    <div class="expertise-modal__panel" role="dialog" aria-modal="true" aria-labelledby="parcoursModalTitle" tabindex="-1">
+      <button type="button" class="expertise-modal__close" id="parcoursModalCloseBtn" data-parcours-close>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg>
+      </button>
+      <div class="expertise-modal__num" id="parcoursModalNum">01</div>
+      <div class="parcours-modal__logo" id="parcoursModalLogo"></div>
+      <p class="parcours-modal__periode" id="parcoursModalPeriode"></p>
+      <h3 class="expertise-modal__title" id="parcoursModalTitle"></h3>
+      <p class="parcours-modal__meta" id="parcoursModalMeta"></p>
+      <p class="expertise-modal__desc" id="parcoursModalDesc"></p>
+    </div>
+  </div>
+
+  <!-- i18n d'abord (définit les traductions), puis les interactions. -->
+  <script src="js/i18n.js?v=20"></script>
+  <script src="js/script.js?v=20"></script>
+  <!-- Carousel 3D des photos de formation (drag pour tourner, clic pour zoomer). Autonome. -->
+  <script src="js/carousel3d.js?v=20"></script>
+  <!-- js/tweaks.js en mode APPLICATION SEULE (EDITEUR_ACTIF=false dans le fichier) : applique
+       les positions fines au chargement (centrage dynamique des colonnes du footer + du nom géant
+       en arabe, miroir RTL du bandeau) SANS afficher aucun éditeur. Mettre EDITEUR_ACTIF=true pour
+       rouvrir l'éditeur de réglages en développement. -->
+  <script src="js/tweaks.js?v=20"></script>
+  <!-- ===================== MODE RÉVISION (caché) — correction de TOUT le texte par Lazhar =====================
+       Activé UNIQUEMENT si l'URL contient ?revision (ex: lazhar-chtioui.vercel.app/?revision) — invisible pour
+       les visiteurs. Rend éditable sur place TOUT texte visible du site (pas seulement les [data-i18n]) : nom
+       géant, dates, noms d'entreprises, lieux, libellés, boutons... Sauvegarde locale (localStorage),
+       export « Copier ». NE MODIFIE JAMAIS le site public : les modifs restent locales tant que Sofian ne les
+       reporte pas dans le code. Repère : clé data-i18n si présente, sinon chemin CSS (pour les textes en dur). -->
+  <style>
+    body.revision-on { padding-bottom: 66px; }
+    body.revision-on [contenteditable="true"] { transition: background .12s, box-shadow .12s; outline: none; }
+    body.revision-on [contenteditable="true"]:hover { box-shadow: 0 0 0 1px rgba(59,130,246,.55); background: rgba(59,130,246,.07); cursor: text; }
+    body.revision-on [contenteditable="true"]:focus { box-shadow: 0 0 0 2px #3b82f6; background: rgba(59,130,246,.12); }
+    body.revision-on .rev-modif { background: rgba(34,197,94,.16); box-shadow: inset 0 0 0 1px rgba(34,197,94,.5); }
+    body.revision-on .apropos-word { opacity: 1 !important; }   /* fige l'anim pour éditer l'intro proprement */
+    #revBar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 100000; background: #0f172a; color: #fff;
+      font: 14px/1.4 system-ui, "Segoe UI", sans-serif; padding: 10px 16px; display: flex; align-items: center;
+      gap: 12px; flex-wrap: wrap; box-shadow: 0 -2px 16px rgba(0,0,0,.35); }
+    #revBar b { color: #93c5fd; white-space: nowrap; }
+    #revBar .rev-hint { opacity: .82; }
+    #revBar .rev-spacer { flex: 1 1 12px; }
+    #revBar button { border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+    #revBar .rev-primary { background: #3b82f6; color: #fff; }
+    #revBar .rev-ghost { background: #334155; color: #fff; }
+    #revCount { opacity: .85; white-space: nowrap; }
+  </style>
+  <script>
+  (function(){
+    var qp = new URLSearchParams(location.search);
+    if (!qp.has('revision') && location.hash.indexOf('revision') < 0) return;
+    var KEY = 'lazhar-revisions-v2';
+    function lang(){ return document.documentElement.lang || 'fr'; }
+    var store; try { store = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ store = {}; }
+    function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
+    var orig = {};      // texte d'origine par identifiant
+    var elById = {};    // identifiant -> élément
+    var reveal = document.getElementById('aproposReveal');
+
+    // Identifiant stable : clé data-i18n, sinon chemin CSS (nth-of-type) jusqu'à un id ou body.
+    function ident(el){
+      var k = el.getAttribute && el.getAttribute('data-i18n'); if (k) return k;
+      if (el === reveal) return 'about.reveal';
+      var parts = [], n = el;
+      while (n && n.nodeType === 1 && n !== document.body) {
+        if (n.id) { parts.unshift('#' + n.id); break; }
+        var i = 1, s = n; while ((s = s.previousElementSibling)) { if (s.tagName === n.tagName) i++; }
+        var cls = (typeof n.className === 'string' && n.className.trim()) ? '.' + n.className.trim().split(/\s+/)[0] : '';
+        parts.unshift(n.tagName.toLowerCase() + cls + ':nth-of-type(' + i + ')');
+        n = n.parentElement;
+      }
+      return parts.join('>');
+    }
+    // Élément-feuille porteur de texte, visible, non exclu.
+    function candidat(el){
+      if (/^(SCRIPT|STYLE|SVG|PATH|USE|IMG|INPUT|TEXTAREA|SELECT|OPTION|BR|HR|CANVAS|VIDEO|AUDIO|IFRAME)$/.test(el.tagName)) return false;
+      if (el.closest('#revBar') || el.closest('#aproposReveal')) return false;   // intro animée gérée en bloc
+      if (el.getAttribute('aria-hidden') === 'true' && !/[A-Za-zÀ-ÿ]/.test(el.textContent || '')) return false;   // aria-hidden décoratif (symboles) exclu ; mais vrai texte (ex: filigrane « CHTIOUI ») reste éditable
+      if (el.hasAttribute('aria-haspopup')) return false;   // déclencheur de popup (ex: pastille 01-08) : laisse le clic OUVRIR la modale
+      if (el.classList && el.classList.contains('lang-current')) return false;    // « FR » dynamique
+      if (!el.getClientRects().length) return false;
+      if (!el.textContent || !el.textContent.trim()) return false;
+      for (var i = 0; i < el.children.length; i++) { if (el.children[i].textContent && el.children[i].textContent.trim()) return false; }
+      return true;
+    }
+    function section(el){
+      var sec = el.closest && el.closest('section, footer, header, nav');
+      var id = sec ? (sec.id || (sec.tagName === 'FOOTER' ? 'footer' : sec.tagName === 'NAV' ? 'nav' : '')) : '';
+      return ({ accueil:'Accueil', apropos:'À propos', expertise:'Expertise', parcours:'Parcours',
+        realisations:'Réalisations', formation:'Formation', contact:'Contact', footer:'Pied de page', nav:'Menu' })[id] || (id || 'Divers');
+    }
+    function activer(el){
+      var id = ident(el); orig[id] = el.textContent; elById[id] = el;
+      var L = lang(); store[L] = store[L] || {};
+      if (store[L][id] != null && store[L][id] !== orig[id]) { el.textContent = store[L][id]; el.classList.add('rev-modif'); }
+      el.setAttribute('contenteditable', 'true'); el.setAttribute('spellcheck', 'true');
+      el.dataset.revSection = section(el);
+      el.addEventListener('mousedown', function(e){ e.stopPropagation(); }, true);
+      el.addEventListener('click', function(e){ e.stopPropagation(); var a = el.closest('a'); if (a) e.preventDefault(); }, true);
+      el.addEventListener('input', function(){
+        var L2 = lang(); store[L2] = store[L2] || {};
+        var v = el.textContent;
+        if (v === orig[id]) { delete store[L2][id]; el.classList.remove('rev-modif'); }
+        else { store[L2][id] = v; el.classList.add('rev-modif'); }
+        save(); majCompteur();
+      });
+    }
+    function changements(){
+      var L = lang(), s = store[L] || {}, out = [];
+      Object.keys(s).forEach(function(id){ if (orig[id] !== undefined && s[id] !== orig[id]) out.push({ id: id, sec: (elById[id] && elById[id].dataset.revSection) || 'Divers', avant: orig[id] || '(vide)', apres: s[id] }); });
+      return out;
+    }
+    function majCompteur(){ var c = document.getElementById('revCount'); if (c){ var n = changements().length; c.textContent = n ? (n + ' correction' + (n > 1 ? 's' : '')) : 'aucune correction'; } }
+    function rapport(){
+      var ch = changements(); if (!ch.length) return '';
+      var t = 'CORRECTIONS DU SITE LAZHAR (langue ' + lang().toUpperCase() + ') — ' + ch.length + ' au total\n\n';
+      ch.forEach(function(c){ t += '• ' + c.sec + ' — repère: ' + c.id + '\n  AVANT : ' + c.avant + '\n  APRÈS : ' + c.apres + '\n\n'; });
+      return t;
+    }
+    function toast(m, ok){ var d = document.createElement('div'); d.textContent = m;
+      d.style.cssText = 'position:fixed;left:50%;top:18px;transform:translateX(-50%);background:' + (ok === false ? '#dc2626' : '#16a34a') + ';color:#fff;padding:10px 18px;border-radius:10px;z-index:100001;font:14px system-ui;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
+      document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 3400); }
+    function copier(){
+      var t = rapport();
+      if (!t) { toast('Aucune correction pour l’instant — cliquez un texte et modifiez-le.', false); return; }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(function(){ toast('Corrections copiées ✓ — collez-les dans un message à Sofian.'); },
+          function(){ window.prompt('Copiez ce texte (Ctrl+C) et envoyez-le à Sofian :', t); });
+      } else { window.prompt('Copiez ce texte (Ctrl+C) et envoyez-le à Sofian :', t); }
+    }
+    // --- Modales/popups dynamiques (Expertise, Parcours, Formation) : leur contenu est rendu au CLIC
+    //     (invisibles au chargement). On les rend éditables À L'OUVERTURE via un MutationObserver.
+    //     Clé = modale:numéro:champ (le numéro est lu dans l'élément ...Num) → pas de collision entre
+    //     cartes qui partagent la même modale. ---
+    var MODALES = { expertiseModal: 'Expertise (détail)', parcoursModal: 'Parcours (détail)', carousel3dLightbox: 'Formation (détail)' };
+    function numDe(m){ var n = m.querySelector('[id$="Num"], [id*="ModalNum"]'); return n ? n.textContent.trim().replace(/\s+/g, '') : '?'; }
+    function champId(el){ if (el.id) return el.id; var p = el.parentElement; var i = Array.prototype.indexOf.call(p.children, el) + 1; return (p.id || el.tagName.toLowerCase()) + '-' + i; }
+    function cleModale(m, el){ return m.id + ':' + numDe(m) + ':' + champId(el); }
+    function activerModale(m){
+      if (m._revBusy || !m.getClientRects().length) return;
+      m._revBusy = true;
+      var L = lang(); store[L] = store[L] || {};
+      var noeuds = m.querySelectorAll('*');
+      for (var i = 0; i < noeuds.length; i++) {
+        var el = noeuds[i];
+        if (!candidat(el)) continue;
+        if (el.id && /Num$|Close/i.test(el.id)) continue;
+        var key = cleModale(m, el);
+        if (!(key in orig)) orig[key] = el.textContent;
+        elById[key] = el;
+        if (store[L][key] != null && store[L][key] !== orig[key]) {
+          if (el !== document.activeElement && el.textContent !== store[L][key]) el.textContent = store[L][key];
+          el.classList.add('rev-modif');
+        } else if (el.textContent === orig[key]) { el.classList.remove('rev-modif'); }
+        if (!el._revWired) {
+          el._revWired = true;
+          el.setAttribute('contenteditable', 'true'); el.setAttribute('spellcheck', 'true');
+          el.dataset.revSection = MODALES[m.id] || 'Détail';
+          el.addEventListener('mousedown', function(e){ e.stopPropagation(); }, true);
+          el.addEventListener('click', function(e){ e.stopPropagation(); }, true);
+          (function(node, modale){
+            node.addEventListener('input', function(){
+              var k = cleModale(modale, node), L2 = lang(); store[L2] = store[L2] || {};
+              var v = node.textContent;
+              if (v === orig[k]) { delete store[L2][k]; node.classList.remove('rev-modif'); }
+              else { store[L2][k] = v; node.classList.add('rev-modif'); }
+              save(); majCompteur();
+            });
+          })(el, m);
+        }
+      }
+      setTimeout(function(){ m._revBusy = false; }, 0);
+    }
+    function observerModales(){
+      Object.keys(MODALES).forEach(function(id){
+        var m = document.getElementById(id); if (!m) return;
+        new MutationObserver(function(){ activerModale(m); }).observe(m, { attributes: true, attributeFilter: ['class','style','hidden','aria-hidden'], childList: true, subtree: true, characterData: true });
+        if (m.getClientRects().length) activerModale(m);
+      });
+    }
+
+    function start(){
+      document.body.classList.add('revision-on');
+      var all = document.querySelectorAll('body *'), list = [];
+      for (var i = 0; i < all.length; i++) { if (candidat(all[i])) list.push(all[i]); }
+      if (reveal && reveal.textContent.trim()) list.push(reveal);   // intro animée « À propos » éditable en bloc
+      list.forEach(activer);
+      var barre = document.createElement('div'); barre.id = 'revBar';
+      barre.innerHTML =
+          '<b>✎ Mode révision</b>'
+        + '<span class="rev-hint">Cliquez n’importe quel texte pour le corriger · sauvegarde auto.</span>'
+        + '<span class="rev-spacer"></span>'
+        + '<span id="revCount"></span>'
+        + '<button class="rev-primary" id="revCopy">Copier mes corrections</button>'
+        + '<button class="rev-ghost" id="revReset">Réinitialiser</button>'
+        + '<button class="rev-ghost" id="revQuit">Quitter</button>';
+      document.body.appendChild(barre);
+      document.getElementById('revCopy').onclick = copier;
+      document.getElementById('revReset').onclick = function(){ if (window.confirm('Effacer toutes vos corrections ?')) { store[lang()] = {}; save(); location.reload(); } };
+      document.getElementById('revQuit').onclick = function(){ location.href = location.pathname; };
+      majCompteur();
+      observerModales();
+      document.addEventListener('langchange', function(){
+        var L = lang(); store[L] = store[L] || {};
+        document.querySelectorAll('[data-i18n][contenteditable="true"]').forEach(function(el){
+          var id = ident(el); orig[id] = el.textContent; elById[id] = el;
+          if (store[L][id] != null && store[L][id] !== orig[id]) { el.textContent = store[L][id]; el.classList.add('rev-modif'); }
+          else el.classList.remove('rev-modif');
+        });
+        majCompteur();
+      });
+    }
+    if (document.readyState === 'complete') start(); else window.addEventListener('load', start);
+  })();
+  </script>
+
+</body>
+</html>

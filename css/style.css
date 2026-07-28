@@ -1,0 +1,2099 @@
+/* =====================================================================
+   PORTFOLIO — Fethi CHTIOUI
+   Feuille de style unique, organisée en 12 blocs numérotés.
+   Lis les blocs dans l'ordre : ils vont du plus général (tokens, reset)
+   au plus spécifique (chaque section), puis au responsive.
+   ---------------------------------------------------------------------
+   SOMMAIRE
+   01. Design tokens (variables CSS : couleurs, typo, espacements…)
+   02. Reset & base
+   03. Utilitaires (conteneur, boutons, titres de section, animations)
+   04. Header / navigation
+   05. Hero (100dvh)
+   06. À propos
+   07. Expertise (cartes numérotées)
+   08. Parcours (timeline)
+   09. Réalisations (grille)
+   10. Formation
+   11. Contact (bannière)
+   12. Footer + Responsive (tablette / mobile)
+   ===================================================================== */
+
+
+/* =====================================================================
+   01. DESIGN TOKENS
+   Toutes les décisions de design vivent ici, en un seul endroit.
+   Changer une valeur ici la propage sur tout le site : c'est la base
+   d'un code maintenable. On ne code jamais une couleur « en dur » plus bas.
+   ===================================================================== */
+:root {
+  /* --- Couleurs de marque ------------------------------------------ */
+  --bleu:            #1d4ed8;   /* bleu principal : boutons, liens, accents  */
+  --bleu-fonce:      #1e3a8a;   /* survol / dégradés                          */
+  --navy:            #0f2557;   /* footer, texte fort sur fond clair          */
+  --navy-2:          #0a1a40;   /* bas du footer                              */
+
+  /* --- Fonds -------------------------------------------------------- */
+  --blanc:           #ffffff;
+  --ciel-clair:      #eaf2ff;   /* haut des dégradés clairs                   */
+  --ciel:            #cfe0fb;   /* bas des dégradés clairs (sections bleutées)*/
+  --ciel-fonce:      #b7d0f7;   /* pic de bleu du hero (vers le milieu)         */
+  --raccord:         #dcecff;   /* couleur de raccord bas-hero ↔ haut-chiffres  */
+  --gris-carte:      #f6f8fe;   /* fond des cartes d'expertise                */
+
+  /* --- Texte -------------------------------------------------------- */
+  --encre:           #0b1220;   /* titres                                     */
+  --texte:           #3f4757;   /* paragraphes                                */
+  --texte-doux:      #6b7280;   /* légendes, texte secondaire                 */
+  --sur-navy:        #c8d4f0;   /* texte clair sur fond navy                  */
+  --sur-navy-doux:   #7f92c4;   /* texte secondaire sur navy                  */
+
+  /* --- Bordures ---------------------------------------------------- */
+  --bordure:         #e6ebf5;
+  --bordure-navy:    rgba(255, 255, 255, .1);
+
+  /* --- Typographie -------------------------------------------------
+     Deux familles suffisent : une pour le titre display, une pour le
+     corps. On les charge via Google Fonts dans le <head>.               */
+  --font-titre: "Plus Jakarta Sans", -apple-system, system-ui, sans-serif;
+  --font-corps: "Inter", -apple-system, system-ui, sans-serif;
+
+  /* Échelle typographique fluide : clamp(min, idéal-en-vw, max).
+     Le texte grandit avec l'écran sans media query. C'est LA technique
+     clé d'un responsive moderne et sans à-coups.                        */
+  --pas-hero:   clamp(3rem, 11vw, 8.5rem);   /* nom géant du hero          */
+  --pas-h2:     clamp(2rem, 4.5vw, 3.25rem); /* titres de section          */
+  --pas-h3:     clamp(1.15rem, 2vw, 1.5rem); /* titres de carte            */
+  --pas-lead:   clamp(1rem, 1.4vw, 1.2rem);  /* chapô                      */
+
+  /* --- Rythme d'espacement (échelle de 4px) ------------------------
+     Utiliser une échelle fixe (au lieu de valeurs au hasard) donne un
+     rythme vertical cohérent = rendu « pro ».                           */
+  --esp-1: .5rem;   --esp-2: 1rem;   --esp-3: 1.5rem;
+  --esp-4: 2rem;    --esp-6: 3rem;   --esp-8: 4rem;
+  --section-y: clamp(4rem, 9vw, 8rem);       /* padding vertical de section */
+
+  /* --- Rayons, ombres, transitions --------------------------------- */
+  --rayon:      16px;
+  --rayon-lg:   28px;
+  --rayon-pill: 999px;
+  --ombre:      0 10px 30px -12px rgba(16, 37, 87, .18);
+  --ombre-forte:0 24px 60px -20px rgba(16, 37, 87, .28);
+  --transition: .35s cubic-bezier(.22, 1, .36, 1);
+
+  /* --- Largeur maximale du contenu --------------------------------- */
+  --max: 1200px;
+}
+
+
+/* =====================================================================
+   02. RESET & BASE
+   Un mini-reset : on neutralise les marges par défaut et on passe en
+   box-sizing: border-box (le padding n'agrandit plus les boîtes).
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; overflow-x: clip; }   /* défilement doux + garde global anti-scroll horizontal (le overflow-x:hidden du body ne couvrait pas le scroll au niveau <html>) */
+
+body {
+  font-family: var(--font-corps);
+  color: var(--texte);
+  background: var(--blanc);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;                     /* garde-fou anti-scroll horizontal */
+  cursor: default;                        /* supprime le curseur "texte" (I-beam) sur tout le site */
+  /* Le texte reste SÉLECTIONNABLE et COPIABLE (comportement normal — utile pour l'e-mail, le
+     téléphone, etc.). On masque UNIQUEMENT le CARET d'insertion (le curseur vertical clignotant)
+     qui apparaît sur du texte non éditable quand le « caret browsing » du navigateur est actif
+     (F7) et donnait l'impression d'un champ éditable. `caret-color: transparent` le rend
+     invisible SANS empêcher la sélection. Les champs de saisie rétablissent un caret visible
+     juste en dessous. */
+  caret-color: transparent;
+}
+
+/* Champs de formulaire (ex. e-mail newsletter) : caret VISIBLE — indispensable pour voir où
+   l'on tape. La sélection y est déjà normale (on ne l'a jamais désactivée globalement). */
+input, textarea, select, [contenteditable="true"] {
+  caret-color: auto;
+}
+
+img { max-width: 100%; display: block; }  /* images fluides par défaut       */
+a   { color: inherit; text-decoration: none; }
+ul  { list-style: none; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-titre);
+  color: var(--encre);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -.02em;                 /* resserre les gros titres        */
+}
+
+/* On respecte les utilisateurs sensibles au mouvement (accessibilité). */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto; }
+}
+
+
+/* =====================================================================
+   03. UTILITAIRES
+   Petites classes réutilisables : conteneur centré, boutons, en-têtes
+   de section, et le système d'animation au scroll.
+   ===================================================================== */
+
+/* Conteneur : centre le contenu et garantit des marges latérales. */
+.conteneur {
+  width: 100%;
+  max-width: none;                 /* pas de plafond général : on utilise la largeur */
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 1.5cm);   /* ~1,5cm de marge de chaque côté */
+}
+/* Footer : largeur contenue à 1200px. Contact : plus large (demandé). */
+.footer > .conteneur { max-width: 1200px; }
+#contact > .conteneur { max-width: calc(50% + 640px); }
+
+/* Espacement vertical standard d'une section. */
+.section { padding-block: clamp(1.25rem, 3.5vh, 2.5rem); }
+
+/* =====================================================================
+   PLEIN ÉCRAN (skill site-web) — chaque section fait exactement un écran,
+   contenu centré verticalement. Le hero garde sa propre mise en page.
+   ===================================================================== */
+section:not(.hero),
+.footer {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* Repères de phase BUILD — retirer la classe `build` sur <body> en prod. */
+body.build section { outline: 8px solid #39ff14; outline-offset: -4px; }
+/* footer exclu temporairement (test demandé par Sofian, sans le repère vert) */
+/* hero exclu : section considérée finie (demandé par Sofian) */
+body.build .hero { outline: none; }
+
+/* En-tête de section : petite étiquette + titre + phrase d'intro.
+   On la réutilise à l'identique partout → cohérence visuelle. */
+.section-eyebrow {
+  font-family: var(--font-titre);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+  margin-bottom: var(--esp-3);
+}
+.section-head {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;       /* titre à gauche, intro à droite  */
+  gap: var(--esp-4);
+  align-items: end;
+  margin-bottom: clamp(1.25rem, 3.5vh, 2.25rem);
+}
+.section-head h2 { font-size: var(--pas-h2); }
+.section-head p  { color: var(--texte-doux); max-width: 42ch; }
+
+/* --- Boutons ------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .85rem 1.6rem;
+  border-radius: var(--rayon-pill);       /* forme « pilule » des références  */
+  font-family: var(--font-titre);
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.btn svg { width: 16px; height: 16px; transition: transform var(--transition); }
+.btn:hover svg { transform: translateX(4px); }     /* la flèche avance au survol */
+
+/* CTA principal : « verre bleu » frosté (léger flou + reflets internes). */
+.btn--primaire {
+  color: #fff;
+  background: rgba(29, 78, 216, .92);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--ombre),
+    inset 1px 1px 1px rgba(255, 255, 255, .35),   /* reflet haut-gauche */
+    inset -1px -1px 1px rgba(0, 0, 0, .15);
+}
+.btn--primaire:hover { background: var(--bleu-fonce); transform: translateY(-2px); box-shadow: var(--ombre-forte); }
+
+.btn--ghost { background: transparent; color: var(--encre); border-color: var(--bordure); }
+.btn--ghost:hover { border-color: var(--bleu); color: var(--bleu); }
+
+/* CTA secondaire : « liquid glass » clair, autonome (verre dépoli). */
+.btn--glass {
+  color: var(--encre);
+  background: rgba(255, 255, 255, .4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .65);
+  box-shadow: var(--ombre),
+    inset 1px 1px 1px rgba(255, 255, 255, .7),
+    inset -1px -1px 1px rgba(16, 37, 87, .06);
+}
+.btn--glass:hover { transform: translateY(-2px); background: rgba(255, 255, 255, .6); box-shadow: var(--ombre-forte); }
+
+/* -----------------------------------------------------------------
+   .glass — effet « liquid glass » réutilisable (nav + boutons).
+   Principe : le contenu réel est posé au-dessus de 2 couches :
+     ::before = fond flouté + déformation (filtre SVG #glass-distortion)
+     ::after  = voile blanc translucide + reflets internes (biseau)
+   Le tout donne l'illusion d'une plaque de verre.
+   ----------------------------------------------------------------- */
+.glass {
+  position: relative;
+  isolation: isolate;                        /* crée un contexte d'empilement */
+  border-radius: var(--rayon-pill);
+  /* Pas d'overflow:hidden ici : il rognerait les menus déroulants (langue).
+     Les couches de verre ci-dessous héritent du rayon pour garder la pilule. */
+  /* Élévation marquée + fin liseré → la pilule se détache nettement du fond. */
+  box-shadow:
+    0 14px 38px -10px rgba(16, 37, 87, .34),   /* ombre portée profonde */
+    0 4px 12px -4px rgba(16, 37, 87, .16),      /* ombre de contact       */
+    0 0 0 1px rgba(16, 37, 87, .06);            /* liseré de contour       */
+}
+.glass::before {                             /* verre dépoli Apple : flou fort + saturation */
+  content: "";
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;                          /* clippe le flou à la forme arrondie */
+  backdrop-filter: blur(30px) saturate(180%);   /* vibrance Apple */
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+.glass::after {                              /* matériau de vibrance (thin) + fin reflet */
+  content: "";
+  position: absolute; inset: 0; z-index: 1;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, .5);       /* matériau thin : opaque mais vibrant grâce au flou */
+  box-shadow: inset 1px 1px 1px 0 rgba(255, 255, 255, .55),
+              inset -1px -1px 1px 0 rgba(255, 255, 255, .22);
+}
+.glass > * { position: relative; z-index: 2; }   /* le contenu reste net */
+
+/* Le filtre SVG lui-même ne doit pas occuper d'espace. */
+.glass-svg { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* --- Animation d'apparition au scroll -----------------------------
+   Les éléments .reveal démarrent invisibles et légèrement décalés ;
+   le JS ajoute .is-visible quand ils entrent dans l'écran. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .7s ease, transform .7s cubic-bezier(.22, 1, .36, 1);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* Expertise — les 6 cartes arrivent de l'EXTÉRIEUR de la section quand la grille entre à
+   l'écran (sens des flèches : colonne gauche depuis la GAUCHE, colonne droite depuis la
+   DROITE, carte haut-milieu depuis le HAUT, carte bas-milieu depuis le BAS). On observe la
+   GRILLE (classe `reveal` sur .cartes-gradient) et NON chaque carte : une carte pré-décalée
+   hors-champ ne serait jamais détectée par l'IntersectionObserver et resterait invisible
+   (bug constaté : seules les 2 cartes du milieu, faiblement décalées, apparaissaient). La
+   grille sert de simple déclencheur (on annule SA propre révélation) ; ses cartes glissent à
+   leur place via `.is-visible`. La section est en overflow:hidden → clip propre aux bords. */
+section.expertise { overflow: hidden; }
+.cartes-gradient.reveal { opacity: 1; transform: none; }
+.cartes-gradient .carte-gradient {
+  opacity: 0;
+  transition: opacity .7s ease, transform .85s cubic-bezier(.22, 1, .36, 1);
+}
+.cartes-gradient .carte-gradient.dir-g { transform: translateX(-70vw); }   /* depuis la gauche */
+.cartes-gradient .carte-gradient.dir-d { transform: translateX(70vw); }    /* depuis la droite */
+.cartes-gradient .carte-gradient.dir-h { transform: translateY(-60vh); }   /* depuis le haut */
+.cartes-gradient .carte-gradient.dir-b { transform: translateY(60vh); }    /* depuis le bas */
+.cartes-gradient.is-visible .carte-gradient { opacity: 1; transform: none; }
+/* Cascade (stagger) une fois la grille visible. */
+.cartes-gradient.is-visible .carte-gradient:nth-child(2) { transition-delay: .07s; }
+.cartes-gradient.is-visible .carte-gradient:nth-child(3) { transition-delay: .14s; }
+.cartes-gradient.is-visible .carte-gradient:nth-child(4) { transition-delay: .21s; }
+.cartes-gradient.is-visible .carte-gradient:nth-child(5) { transition-delay: .28s; }
+.cartes-gradient.is-visible .carte-gradient:nth-child(6) { transition-delay: .35s; }
+/* RTL : la grille est mirroir­ée (les colonnes s'inversent) → on INVERSE les directions
+   horizontales pour garder la même logique visuelle qu'en LTR (colonne visuellement à gauche
+   arrive de la gauche, etc.). Le reset `.is-visible` en RTL doit venir APRÈS (même spécificité)
+   pour l'emporter sur les règles dir-* RTL ci-dessus. */
+[dir="rtl"] .cartes-gradient .carte-gradient.dir-g { transform: translateX(70vw); }
+[dir="rtl"] .cartes-gradient .carte-gradient.dir-d { transform: translateX(-70vw); }
+[dir="rtl"] .cartes-gradient.is-visible .carte-gradient { transform: none; }
+/* RTL : le schéma/icône déco de chaque carte passe en bas à GAUCHE (au lieu de droite) et la
+   flèche du CTA « Voir le détail » pointe vers la gauche. */
+[dir="rtl"] .carte-gradient__deco { right: auto; left: .75rem; }
+[dir="rtl"] .carte-gradient__cta svg { transform: scaleX(-1); }
+[dir="rtl"] .carte-gradient:hover .carte-gradient__cta svg { transform: scaleX(-1) translateX(4px); }
+
+/* =====================================================================
+   ENTRÉE DU HERO — les 4 blocs (nom, bloc gauche, bloc droit, photo)
+   arrivent de l'extérieur de la section, en cascade (stagger). Joue au
+   chargement (le Hero est au-dessus de la ligne de flottaison). Animé sur
+   `transform` : les positions finales sont portées par `translate`/`scale`
+   (propriétés distinctes qui se composent) → l'état final `transform:none`
+   laisse chaque bloc EXACTEMENT à sa place réglée. Désactivé automatiquement
+   par le bloc prefers-reduced-motion plus haut (les blocs restent visibles).
+   ===================================================================== */
+.heroIn {
+  animation-duration: .9s;
+  animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+  animation-fill-mode: both;   /* avant le début (délai) : garde l'état 0% = hors-champ */
+}
+.heroIn--top    { animation-name: heroInTop; }
+.heroIn--bottom { animation-name: heroInBottom; }
+.heroIn--left   { animation-name: heroInLeft; }
+.heroIn--right  { animation-name: heroInRight; }
+@keyframes heroInTop    { from { opacity: 0; transform: translateY(-120px); } to { opacity: 1; transform: none; } }
+@keyframes heroInBottom { from { opacity: 0; transform: translateY(120px);  } to { opacity: 1; transform: none; } }
+@keyframes heroInLeft   { from { opacity: 0; transform: translateX(-55vw);  } to { opacity: 1; transform: none; } }
+@keyframes heroInRight  { from { opacity: 0; transform: translateX(55vw);   } to { opacity: 1; transform: none; } }
+/* Décalage entre les blocs : nom → gauche → droite → photo (entrée non uniforme). */
+.hero3__ghost.heroIn { animation-delay: .05s; }
+.hero3__intro.heroIn { animation-delay: .18s; }
+.hero3__side.heroIn  { animation-delay: .30s; }
+.hero3__photo.heroIn { animation-delay: .42s; }
+/* RTL (arabe) : la mise en page est en miroir → le bloc "gauche" (intro) passe à
+   DROITE et le bloc "droite" (side) passe à GAUCHE. On inverse donc le sens
+   d'entrée pour qu'ils viennent toujours de l'EXTÉRIEUR (comme en FR/EN). */
+[dir="rtl"] .heroIn--left  { animation-name: heroInRight; }
+[dir="rtl"] .heroIn--right { animation-name: heroInLeft; }
+
+/* Stagger de révélation des étapes du Parcours (fondu-haut `.reveal`, en cascade). */
+.parcours-voie .etape:nth-of-type(2) { transition-delay: .08s; }
+.parcours-voie .etape:nth-of-type(3) { transition-delay: .16s; }
+.parcours-voie .etape:nth-of-type(4) { transition-delay: .24s; }
+.parcours-voie .etape:nth-of-type(5) { transition-delay: .32s; }
+.parcours-voie .etape:nth-of-type(6) { transition-delay: .40s; }
+.parcours-voie .etape:nth-of-type(7) { transition-delay: .48s; }
+.parcours-voie .etape:nth-of-type(8) { transition-delay: .56s; }
+
+
+/* =====================================================================
+   04. HEADER / NAVIGATION
+   Barre fixe, translucide, qui se densifie au défilement (classe .scrolled
+   ajoutée par le JS).
+   ===================================================================== */
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;                      /* collée en haut, pleine largeur  */
+  z-index: 100;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+/* Cachée au scroll vers le bas, réaffichée au scroll vers le haut (JS). */
+.header.header--hidden { transform: translateY(-130%); }
+/* Enveloppe qui fait flotter la pilule et lui donne de l'air en haut. */
+.nav-wrap { padding-top: clamp(1.4rem, 2.4vw, 2.25rem); }
+
+/* La barre de nav est une PILULE en « liquid glass » (classe .glass). */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  height: 64px;
+  padding: 0 .7rem 0 1.4rem;
+  border-radius: var(--rayon-pill);
+  transition: box-shadow var(--transition);
+}
+.header.scrolled .nav { box-shadow: var(--ombre-forte); }
+
+.nav__logo {
+  font-family: var(--font-titre);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -.02em;
+  color: var(--encre);
+}
+.nav__logo span { color: var(--bleu); }
+.nav__menu { display: flex; align-items: center; gap: clamp(.8rem, 2vw, 1.8rem); }
+.nav__link {
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--encre);
+  position: relative;
+  transition: color var(--transition);
+}
+.nav__link::after {                       /* soulignement animé au survol    */
+  content: "";
+  position: absolute;
+  left: 0; bottom: -6px;
+  width: 0; height: 2px;
+  background: var(--bleu);
+  transition: width var(--transition);
+}
+.nav__link:hover { color: var(--bleu); }
+.nav__link:hover::after { width: 100%; }
+
+/* Zone de droite : sélecteur de langue + CTA. */
+.nav__actions { display: flex; align-items: center; gap: .6rem; }
+.nav .btn--primaire { padding: .6rem 1.2rem; font-size: .88rem; }
+
+/* --- Sélecteur de langue (FR / EN / AR) --------------------------- */
+.lang { position: relative; }
+.lang__btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .5rem .7rem;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-pill);
+  background: rgba(255, 255, 255, .5);
+  font-family: var(--font-titre); font-weight: 700; font-size: .82rem;
+  color: var(--encre); cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+.lang__btn:hover { border-color: var(--bleu); }
+.lang__btn svg { width: 16px; height: 16px; }
+.lang__chevron { transition: transform var(--transition); }
+.lang.open .lang__chevron { transform: rotate(180deg); }
+.lang__menu {
+  position: absolute; top: calc(100% + .5rem); right: 0;
+  min-width: 168px;
+  background: #fff;
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  box-shadow: var(--ombre-forte);
+  padding: .4rem;
+  opacity: 0; visibility: hidden; transform: translateY(-8px);
+  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  z-index: 20;
+}
+.lang.open .lang__menu { opacity: 1; visibility: visible; transform: translateY(0); }
+.lang__menu li {
+  padding: .6rem .8rem; border-radius: 9px; cursor: pointer;
+  font-weight: 600; font-size: .9rem; color: var(--texte);
+  transition: background var(--transition), color var(--transition);
+}
+.lang__menu li:hover,
+.lang__menu li[aria-selected="true"] { background: rgba(29, 78, 216, .08); color: var(--bleu); }
+
+/* Bouton burger : caché sur desktop, affiché en mobile (bloc 12). */
+.nav__burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 8px;
+}
+.nav__burger span {
+  width: 24px; height: 2px; background: var(--encre);
+  border-radius: 2px; transition: var(--transition);
+}
+
+
+/* =====================================================================
+   05. HERO — plein écran (100dvh), composition « façon référence ».
+   dvh = « dynamic viewport height » : tient compte des barres mobiles.
+   Mise en page en GRILLE 3×3 : le nom et « Suivez-moi » en haut, la photo
+   au centre (sur toute la hauteur), l'intro et le métier géant en bas.
+   ===================================================================== */
+.hero {
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  overflow: hidden;
+  padding-top: 90px;                      /* réserve la place de la nav flottante */
+  /* Dégradé clair en haut → bleu plus soutenu en bas (comme la référence). */
+  background: linear-gradient(180deg, #fff 0%, var(--ciel-clair) 32%, var(--ciel-fonce) 58%, var(--ciel) 80%, var(--raccord) 100%);
+}
+/* Motif de grille très léger, estompé haut et bas. */
+.hero::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(29, 78, 216, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 78, 216, .05) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent);
+}
+
+/* Le hero utilise aussi toute la largeur (marges ~0,5cm comme le reste). */
+.hero > .conteneur { max-width: none; }
+
+/* =====================================================================
+   HERO 3 — composition « signature » : nom géant en couleur pleine sur
+   toute la largeur (rangée du haut) · photo au premier plan, ANCRÉE en
+   bas et FIXE (pas de data-tw : position verrouillée, non tweakable) ·
+   gauche = rôle+intro+CTA · droite = domaines+logos. Chaque texte est une
+   cible de tweak INDÉPENDANTE. Inspirée d'une référence de Sofian.
+   ===================================================================== */
+.hero3 {
+  position: relative; z-index: 2; width: 100%;
+  height: calc(100dvh - 90px);
+  display: flex; flex-direction: column;
+}
+
+.hero3__main {
+  position: relative; flex: 1 1 auto; min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 480px) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  column-gap: clamp(1.5rem, 3vw, 3.5rem);
+  padding-block: 1.6rem 0;   /* FIXE (pas 3vh) : le vh varie avec la hauteur de fenêtre (F11) → décalait tout le Hero de quelques px */
+}
+
+/* Nom géant en COULEUR PLEINE, pleine largeur, en rangée du haut. Marge
+   d'environ 2 cadrillages (~2 cm) de chaque côté via le padding-inline
+   du conteneur .hero3__main (hérité) — ici juste centré, sans nowrap
+   forcé au-delà de la largeur dispo. */
+.hero3__ghost {
+  grid-column: 1 / -1; grid-row: 1;
+  z-index: 0; margin: 0; text-align: center; white-space: nowrap;
+  font-family: var(--font-titre); font-weight: 800;
+  font-size: clamp(3.5rem, 14.5vw, 17.5rem);
+  line-height: .92; letter-spacing: -.03em;
+}
+.hero3__ghost span { color: var(--encre); text-transform: uppercase; }   /* MAJ. prénom/nom figées par Sofian (réglable via tweaks) */
+.hero3__ghost .accent { color: var(--bleu); margin-inline-start: .18em; }
+
+/* Rôle + intro + CTA (gauche) — empilement simple par défaut ; chaque
+   enfant est une cible de tweak indépendante (translate ne casse pas
+   l'empilement, il ne fait que décaler visuellement). */
+.hero3__intro {
+  grid-column: 1; grid-row: 2; align-self: center; z-index: 1; max-width: 34ch;
+  display: flex; flex-direction: column; gap: 1.1rem; align-items: flex-start;
+}
+/* Fond vitré repris du widget citation de la Hero 2 (.hero2__quote) — le
+   texte se pose sur une carte translucide au lieu d'être nu sur le fond. */
+.hero3__lead {
+  position: relative; max-width: 28ch;  /* force "par" à rejoindre la ligne de "les projets..." */
+  color: var(--texte); font-size: clamp(.82rem, .95vw, .9rem); line-height: 1.55; margin: 0;
+  background: rgba(255, 255, 255, .5);
+  backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: var(--rayon-lg);
+  box-shadow: var(--ombre);
+  padding: clamp(.6rem, 1vw, .85rem);
+}
+.hero3__lead::before,                       /* guillemets orange, collés au texte (avant B / après le point) */
+.hero3__lead::after {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  color: #f59e0b;
+}
+.hero3__lead::before { content: "\201C"; }
+.hero3__lead::after { content: "\201D"; }
+.hero3__cta { box-shadow: var(--ombre-forte); }
+
+/* Photo : au premier plan (devant le nom), s'étend sur les 2 rangées pour
+   pouvoir remonter derrière le nom, mais reste ANCRÉE en bas (object-fit
+   contain + object-position bottom) quelle que soit la hauteur dispo —
+   position fixe, verrouillée (pas de data-tw). Fondue en dégradé sur les
+   3 bords (bas + gauche + droite), pas sur le haut (tête nette). */
+.hero3__photo {
+  grid-column: 2; grid-row: 1 / 3; justify-self: center;
+  position: relative; z-index: 1;
+  width: 100%; height: 100%; overflow: hidden;
+  transform-origin: bottom center;   /* le tweak « T » (taille) grossit depuis le bas-centre : ne décolle jamais du bas, ne décentre jamais */
+}
+.hero3__photo::before {                     /* halo bleu doux derrière le sujet */
+  content: ""; position: absolute; inset: auto 0 0 0; top: 8%;
+  background: radial-gradient(60% 55% at 50% 60%, rgba(29, 78, 216, .18), transparent 70%);
+  filter: blur(10px);
+}
+.hero3__photo img {
+  position: relative; width: 100%; height: 100%; min-height: 0; min-width: 0;
+  object-fit: contain; object-position: bottom center;
+  filter: drop-shadow(0 18px 34px rgba(16, 37, 87, .16));
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 90%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  -webkit-mask-composite: source-in;
+          mask-image:
+    linear-gradient(to bottom, #000 90%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+          mask-composite: intersect;
+}
+
+/* Domaines + logos (droite), empilés, chacun tweakable indépendamment. */
+.hero3__side { grid-column: 3; grid-row: 2; align-self: center; z-index: 1; display: flex; flex-direction: column; align-items: flex-end; gap: 2rem; }
+
+/* Roue façon molette Horloge iOS — cylindre 3D en boucle infinie, actif au
+   centre. Lignes positionnées/animées par JS (rotateX + translateZ), fondu
+   haut/bas en masque CSS. Glisser (souris/tactile), molette, flèches clavier
+   ou auto-défilement (repris après une pause d'inactivité) font tourner la
+   roue ; purement décoratif, aucun effet ailleurs sur la page. */
+.hero3__wheel {
+  position: relative; width: clamp(220px, 22vw, 300px); height: 128px;
+  overflow: hidden; perspective: 700px;
+  cursor: grab; touch-action: pan-x; outline-offset: 4px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 32%, #000 68%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 32%, #000 68%, transparent 100%);
+}
+.hero3__wheel.is-dragging { cursor: grabbing; }
+/* Focus clavier uniquement (accessibilité) — pas d'indicateur au clic souris : la roue
+   s'active au MAINTIEN du clic (voir script.js §9), pas par un focus persistant. */
+.hero3__wheel:focus-visible { outline: 2px solid var(--bleu); outline-offset: 4px; }
+.hero3__wheelTrack { position: absolute; inset: 0; }
+.hero3__wheelItem {
+  position: absolute; left: 0; right: 0; top: 50%;
+  text-align: right;
+  font-family: var(--font-titre); font-weight: 600;
+  font-size: clamp(.95rem, 1.3vw, 1.15rem);
+  color: var(--texte-doux); white-space: nowrap; pointer-events: none;
+}
+.hero3__wheelItem.is-actif {
+  color: var(--navy); font-weight: 800;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+}
+
+.hero3__logos { display: flex; flex-direction: column; align-items: flex-end; gap: .5rem; }
+.hero3__logosRow { display: flex; justify-content: flex-end; }
+.hero3__logo {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #fff; border: 2px solid #fff;
+  box-shadow: 0 4px 12px -4px rgba(16, 37, 87, .25);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; margin-left: -12px; flex: 0 0 auto;
+}
+.hero3__logo:first-child { margin-left: 0; }
+.hero3__logo img { width: 66%; height: 66%; object-fit: contain; }
+.hero3__logo--count { background: var(--bleu); color: #fff; font-family: var(--font-titre); font-weight: 800; font-size: .82rem; }
+
+/* Rond-flèche : bouton qui replie/déplie le reste des logos (.hero3__logosGroup).
+   Anim en `transform`/`opacity` UNIQUEMENT (jamais `max-width`/`overflow`) : ces
+   propriétés ne redéclenchent aucun calcul de mise en page, donc la largeur
+   réservée par le groupe ne bouge jamais — le rond-flèche reste rigoureusement
+   immobile pendant toute l'animation (avant : `max-width` rétrécissait la vraie
+   largeur du bloc, ce qui faisait glisser le bouton de ~190px, perçu comme un
+   à-coup/manque de fluidité). Les 2 transitions démarrent en même temps, sans
+   délai, pour supprimer toute sensation de latence au clic. */
+.hero3__logoToggle {
+  padding: 0; font: inherit; cursor: pointer; margin-left: -12px;  /* chevauche le badge « +3 », qui le précède désormais */
+  transform: rotate(180deg);  /* flèche vers la gauche — FIXE, ne tourne plus selon l'état ouvert/fermé */
+}
+.hero3__logosGroup {
+  display: flex;
+  transform-origin: right center;  /* replie vers la droite (ancré sur le rond-flèche, qui suit désormais le groupe), déplie vers la gauche */
+  transition: transform .4s cubic-bezier(.4, 0, .2, 1), opacity .4s cubic-bezier(.4, 0, .2, 1);
+  will-change: transform, opacity;
+}
+.hero3__logos.is-collapsed .hero3__logosGroup {
+  transform: scaleX(0); opacity: 0;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   STATS — bande de chiffres animés, juste sous le hero.
+   ===================================================================== */
+/* Le fond démarre EXACTEMENT sur la couleur de bas du hero (--raccord) puis
+   continue de s'éclaircir jusqu'au blanc. Comme le hero s'éclaircit déjà en
+   arrivant en bas, la descente est monotone → aucune bande, fondu propre. */
+.stats-strip { background: linear-gradient(180deg, var(--raccord) 0%, #fff 46%); border-bottom: 1px solid var(--bordure); padding-block: clamp(2.5rem, 5vw, 4rem); }
+/* COMPACTE (choix voulu de Sofian) : pas de plein écran 100dvh → la section fait la hauteur
+   de son contenu, avec un padding haut = bas (symétrie stricte autour des chiffres).
+   `section.` pour battre la règle globale `section:not(.hero){min-height:100dvh}` (même
+   spécificité, mais placée après → gagne). justify-content:center neutre en hauteur auto. */
+section.stats-strip { min-height: auto; }
+.hero__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--esp-4);
+}
+.stat { position: relative; text-align: center; }
+/* Séparateurs verticaux entre les stats (desktop uniquement, cf. media query mobile). */
+.stat:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 12%; bottom: 12%;
+  width: 1px;
+  background: var(--bordure);
+}
+/* Petit trait d'accent au-dessus du chiffre : structure le regard, signale "donnée clé". */
+.stat::after {
+  content: "";
+  display: block;
+  width: 28px; height: 3px;
+  margin: 0 auto .7rem;
+  border-radius: var(--rayon-pill);
+  background: linear-gradient(90deg, var(--bleu), var(--bleu-fonce));
+}
+.stat__chiffre {
+  font-family: var(--font-titre);
+  font-weight: 900;
+  font-size: clamp(3.2rem, 6.8vw, 5.6rem);
+  line-height: 1;
+  letter-spacing: .03em;
+  background: linear-gradient(135deg, var(--navy), var(--bleu));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-flex;
+  align-items: baseline;
+}
+.stat__plus {
+  font-size: .55em;
+  font-weight: 800;
+  margin-left: .05em;
+}
+.stat__label {
+  font-size: .92rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--texte-doux);
+  margin-top: .5rem;
+}
+
+
+/* =====================================================================
+   06. À PROPOS
+   Deux colonnes : un visuel/citation à gauche, le texte à droite.
+   ===================================================================== */
+/* À PROPOS — section « reveal » façon Apple : titre discret + grand texte centré
+   qui se colore progressivement au scroll (gris clair → foncé), mots-clés en bleu.
+   Le texte est construit par script.js §11 depuis about.reveal (un <span> par mot). */
+.apropos-reveal { text-align: center; border-bottom: 1px solid var(--bordure); }   /* même fin trait qu'en haut (border-bottom de Stats) → sépare À propos de « Ils m'ont fait confiance » */
+.apropos-reveal__wrap {
+  max-width: 1200px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(1.4rem, 3.5vh, 2.6rem);
+}
+.apropos-reveal__titre {
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 700; color: var(--texte-doux);
+  letter-spacing: -.01em; margin: 0;
+}
+.apropos-reveal__texte {
+  font-family: var(--font-titre);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.6vw, 2.4rem);   /* réduit pour tenir en ~4-5 lignes sur toute la largeur (~1200px) */
+  line-height: 1.4; letter-spacing: -.02em;
+  max-width: 1200px; margin: 0;
+}
+.apropos-reveal__texte .apropos-word { color: #d3dbec; transition: color .3s ease; }   /* gris clair au repos ; transition courte = rendu « mot par mot » */
+.apropos-reveal__texte .apropos-word.is-on { color: var(--encre); }                    /* révélé : foncé */
+.apropos-reveal__texte .apropos-word.accent { font-weight: 800; }                      /* mot-clé : plus gras */
+.apropos-reveal__texte .apropos-word.accent.is-on { color: var(--bleu); }              /* mot-clé révélé : bleu */
+.apropos__points {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .7rem;
+  margin-top: 0;
+}
+/* Pilules : badges arrondis, léger dégradé bleu ciel, ombre douce, relief au survol. */
+.apropos__points li {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .55rem 1.05rem;
+  border-radius: var(--rayon-pill);
+  background: linear-gradient(135deg, var(--ciel-clair), #fff);
+  border: 1px solid var(--bordure);
+  box-shadow: 0 2px 7px -4px rgba(16, 37, 87, .28);
+  font-weight: 700; color: var(--navy); font-size: .9rem;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+.apropos__points li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -8px rgba(16, 37, 87, .35);
+  border-color: var(--bleu);
+}
+.apropos__points svg {
+  width: 15px; height: 15px; color: var(--bleu); flex-shrink: 0;
+  padding: 2px; border-radius: 50%; background: rgba(29, 78, 216, .1);
+  box-sizing: content-box;
+}
+/* Bande défilante (activée en mobile ≤640, cf. média plus bas). En desktop, le
+   wrapper ne fait que recentrer la liste et les clones sont masqués. */
+.apropos__marquee { display: flex; justify-content: center; }
+.apropos__points li.is-clone { display: none; }
+@keyframes aproposDefile { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+
+/* =====================================================================
+   07. EXPERTISE — cartes numérotées (façon « Service » des captures)
+   ===================================================================== */
+.expertise { background: linear-gradient(180deg, #fff, var(--ciel-clair)); }
+
+/* En-tête « filet de chapitre » : eyebrow + trait horizontal sur une
+   ligne, titre pleine largeur en dessous, description en légende
+   resserrée alignée à droite — casse la grille 2 colonnes par défaut. */
+.section-head--filet { display: flex; flex-direction: column; align-items: stretch; gap: .5rem; }
+.section-head--filet .section-head__ligne { display: flex; align-items: center; gap: .9rem; }
+.section-head--filet .section-eyebrow { margin-bottom: 0; white-space: nowrap; }
+.section-head--filet .section-head__trait { flex: 1; height: 1px; background: var(--bordure); }
+.section-head--filet h2 { margin: 0; }
+.section-head--filet .section-head__legende { align-self: flex-end; max-width: 38ch; text-align: right; margin: 0; }
+
+/* --- Modale de détail (clic sur une carte) — voir js/script.js -------
+   Conteneur plein écran fixe, centré en flex ; overlay + panneau.
+   Propriétés « logiques » (inline-start/end) pour s'adapter au RTL
+   sans règle [dir="rtl"] séparée. */
+.expertise-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5vh 1.5rem;
+  visibility: hidden;
+  transition: visibility 0s var(--transition);
+}
+.expertise-modal.open {
+  visibility: visible;
+  transition: visibility 0s;
+}
+/* Le flou et l'assombrissement s'animent sur l'overlay lui-même (pas sur
+   le conteneur parent) : sans ça, backdrop-filter passe de 0 à 4px de
+   flou d'un coup au lieu de monter progressivement — c'est ce qui rendait
+   l'apparition de la modale saccadée. */
+.expertise-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 18, 40, .6);
+  opacity: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: opacity var(--transition), backdrop-filter var(--transition), -webkit-backdrop-filter var(--transition);
+}
+.expertise-modal.open .expertise-modal__overlay {
+  opacity: 1;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.expertise-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--blanc);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre-forte);
+  padding: clamp(1.75rem, 4vh, 2.75rem);
+  opacity: 0;
+  transform: translateY(12px) scale(.97);
+  transition: transform var(--transition), opacity var(--transition), background var(--transition);
+}
+.expertise-modal.open .expertise-modal__panel { opacity: 1; transform: translateY(0) scale(1); }
+/* --- Variantes de couleur — le panneau reprend le dégradé de la carte
+   cliquée (voir js/script.js : classe expertise-modal__panel--<variante>
+   posée dynamiquement à l'ouverture, même palette que .carte-gradient--*). */
+.expertise-modal__panel--bleu    { background: linear-gradient(135deg, #eaf2ff, #cfe0fb80); }
+.expertise-modal__panel--slate   { background: linear-gradient(135deg, #f1f4f9, #dbe2ef80); }
+.expertise-modal__panel--emerald { background: linear-gradient(135deg, #e8f9f2, #bdeeda80); }
+.expertise-modal__panel--amber   { background: linear-gradient(135deg, #fff6e5, #ffe4b380); }
+.expertise-modal__panel--indigo  { background: linear-gradient(135deg, #edeafe, #d7cffb80); }
+.expertise-modal__panel--navy    { background: linear-gradient(135deg, #0f2557, #1e3a8a); }
+.expertise-modal__panel--navy .expertise-modal__title { color: #fff; }
+.expertise-modal__panel--navy .expertise-modal__desc,
+.expertise-modal__panel--navy .expertise-modal__examples li { color: var(--sur-navy); }
+.expertise-modal__panel--navy .expertise-modal__examplesLabel { color: var(--sur-navy-doux); }
+.expertise-modal__panel--navy .expertise-modal__examples li::before { background: #fff; }
+.expertise-modal__panel--navy .expertise-modal__num { color: rgba(255, 255, 255, .25); }
+.expertise-modal__panel--navy .expertise-modal__close { background: rgba(255, 255, 255, .14); color: #fff; }
+.expertise-modal__panel--navy .expertise-modal__close:hover { background: rgba(255, 255, 255, .22); color: #fff; }
+.expertise-modal__close {
+  position: absolute;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  width: 2.25rem; height: 2.25rem;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 50%;
+  background: var(--gris-carte);
+  color: var(--texte-doux);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.expertise-modal__close:hover { background: rgba(29, 78, 216, .1); color: var(--bleu); }
+.expertise-modal__close:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; }
+.expertise-modal__close svg { width: 1.1rem; height: 1.1rem; }
+.expertise-modal__num {
+  font-family: var(--font-titre);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3vh, 2rem);
+  color: rgba(29, 78, 216, .2);
+  line-height: 1;
+  margin-bottom: .5rem;
+}
+.expertise-modal__title { font-size: clamp(1.3rem, 2.4vh, 1.7rem); margin-bottom: .75rem; }
+.expertise-modal__desc { color: var(--texte); line-height: 1.6; margin-bottom: 1.5rem; }
+.expertise-modal__examplesLabel {
+  font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--texte-doux); margin-bottom: .6rem;
+}
+.expertise-modal__examples { display: flex; flex-direction: column; gap: .65rem; }
+.expertise-modal__examples li {
+  list-style: none;
+  padding-inline-start: 1.1rem;
+  position: relative;
+  color: var(--texte);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+.expertise-modal__examples li::before {
+  content: "";
+  position: absolute; inset-inline-start: 0; top: .5em;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--bleu);
+}
+@media (prefers-reduced-motion: reduce) {
+  .expertise-modal, .expertise-modal__overlay, .expertise-modal__panel { transition: none; }
+}
+
+/* --- Cartes Expertise « Gradient Card » — fond dégradé + badge + icône
+   décorative. Chaque carte porte data-carte (id 1-6) : au clic, la
+   modale de détail (voir plus bas) reprend le même dégradé qu'elle. */
+.cartes-gradient {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1rem, 2vh, 1.5rem);
+}
+.carte-gradient {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+  border-radius: var(--rayon);
+  padding: clamp(1.25rem, 2.4vh, 1.75rem);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.carte-gradient:hover { transform: translateY(-6px); box-shadow: var(--ombre-forte); }
+.carte-gradient:focus-visible { outline: 2px solid var(--bleu); outline-offset: 3px; }
+.carte-gradient--bleu   { background: linear-gradient(135deg, #eaf2ff, #cfe0fb80); }
+.carte-gradient--slate  { background: linear-gradient(135deg, #f1f4f9, #dbe2ef80); }
+.carte-gradient--emerald{ background: linear-gradient(135deg, #e8f9f2, #bdeeda80); }
+.carte-gradient--amber  { background: linear-gradient(135deg, #fff6e5, #ffe4b380); }
+.carte-gradient--indigo { background: linear-gradient(135deg, #edeafe, #d7cffb80); }
+.carte-gradient--navy   { background: linear-gradient(135deg, #0f2557, #1e3a8a); }
+.carte-gradient--navy h3,
+.carte-gradient--navy .carte-gradient__desc { color: #fff; }
+.carte-gradient--navy .carte-gradient__desc { color: var(--sur-navy); }
+.carte-gradient__deco {
+  position: absolute;
+  right: .75rem; bottom: .75rem;
+  width: 6rem; height: 6rem;
+  color: rgba(15, 37, 87, .12);
+  transition: transform var(--transition);
+}
+.carte-gradient--navy .carte-gradient__deco { color: rgba(255, 255, 255, .12); }
+.carte-gradient:hover .carte-gradient__deco { transform: scale(1.1) rotate(6deg); }
+.carte-gradient__deco svg { width: 100%; height: 100%; }
+.carte-gradient__badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  width: fit-content;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--texte);
+  background: rgba(255, 255, 255, .6);
+  backdrop-filter: blur(6px);
+  padding: .3rem .7rem;
+  border-radius: var(--rayon-pill);
+  margin-bottom: 1rem;
+}
+.carte-gradient--navy .carte-gradient__badge { color: #fff; background: rgba(255, 255, 255, .14); }
+.carte-gradient__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bleu); }
+.carte-gradient h3 { position: relative; z-index: 1; font-size: clamp(1.1rem, 1.8vh, 1.35rem); margin-bottom: .4rem; }
+.carte-gradient__desc { position: relative; z-index: 1; color: var(--texte-doux); font-size: .88rem; line-height: 1.5; flex-grow: 1; }
+.carte-gradient__cta {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: 1rem;
+  font-size: .86rem;
+  font-weight: 700;
+  color: var(--bleu);
+}
+.carte-gradient--navy .carte-gradient__cta { color: #fff; }
+.carte-gradient__cta svg { width: 1rem; height: 1rem; transition: transform var(--transition); }
+.carte-gradient:hover .carte-gradient__cta svg { transform: translateX(4px); }
+@media (max-width: 900px) {
+  .cartes-gradient { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 620px) {
+  .cartes-gradient { grid-template-columns: 1fr; }
+  /* En 1 colonne, on remplace l'entrée par colonne (haut/bas/côtés) par une
+     ALTERNANCE gauche/droite selon la position : impair←gauche, pair→droite
+     (bloc 1 gauche, 2 droite, 3 gauche, …). Sélecteur `[dir]` = spécificité
+     suffisante pour battre les règles de base ET les règles [dir="rtl"].
+     Mobile uniquement : le desktop garde l'entrée par colonne. */
+  [dir] .cartes-gradient .carte-gradient:nth-child(odd)  { transform: translateX(-70vw); }
+  [dir] .cartes-gradient .carte-gradient:nth-child(even) { transform: translateX(70vw); }
+  [dir] .cartes-gradient.is-visible .carte-gradient      { transform: none; }
+}
+
+
+/* =====================================================================
+   08. PARCOURS — voie courbée (pastilles alternées pic/creux)
+   Chaque poste est un point sur une courbe unique, façon frise de
+   progression. Le libellé (période + rôle + entreprise) se pose au-dessus
+   ou en dessous du point selon qu'il est un pic ou un creux de la voie.
+   ===================================================================== */
+/* .section-head est en grille 2 colonnes (titre | intro) par défaut ;
+   Parcours n'a plus de paragraphe d'intro (retiré) → un seul enfant
+   collait à gauche dans la 1re colonne. Recentré en 1 colonne. */
+.parcours .section-head {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+/* `.section-head p { max-width:42ch }` (règle générique plus haut, pensée
+   pour l'ancienne phrase d'intro) capturait aussi l'eyebrow — qui est un
+   <p> — le réduisant à ~380px au lieu des ~911px du conteneur ; sans cette
+   largeur pleine, text-align:center n'avait plus rien à centrer et la
+   boîte restait collée à gauche par défaut. Neutralisé ici. */
+.parcours .section-eyebrow { max-width: none; margin-bottom: .5rem; }
+.parcours { background: linear-gradient(180deg, var(--ciel-clair) 0%, var(--ciel) 52%, #fff 100%); }   /* intro bleue en haut + sortie en fondu vers le blanc en bas (plus de coupe nette) */
+
+.parcours-voie {
+  position: relative;
+  width: 100%; max-width: 1360px; margin-inline: auto;
+  height: clamp(144px, 19vh, 205px);
+  margin-top: clamp(6rem, 16vh, 8rem);
+  margin-bottom: clamp(3rem, 7vh, 4.5rem);
+}
+.parcours-voie__trace { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.parcours-voie__trace path {
+  fill: none; stroke: url(#parcours-grad); stroke-width: 3;
+  stroke-linecap: round; vector-effect: non-scaling-stroke;
+}
+
+.etape { position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; }
+
+.etape__pastille {
+  position: absolute; top: 0; left: 0; transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--blanc); border: 2px solid var(--bleu); color: var(--bleu);
+  font-family: var(--font-titre); font-weight: 800; font-size: .86rem;
+  box-shadow: var(--ombre);
+  cursor: pointer; transition: transform var(--transition), box-shadow var(--transition);
+}
+.etape__pastille:hover,
+.etape__pastille:focus-visible { transform: translate(-50%, -50%) scale(1.1); box-shadow: var(--ombre-forte); }
+.etape__pastille:focus-visible { outline: 2px solid var(--bleu); outline-offset: 3px; }
+.etape--actuel .etape__pastille {
+  width: 60px; height: 60px;
+  background: var(--navy); border-color: var(--navy); color: var(--blanc);
+  box-shadow: 0 12px 28px -10px rgba(15, 37, 87, .55);
+}
+
+.etape__texte {
+  position: absolute; left: 0; transform: translateX(-50%);
+  width: clamp(120px, 15vw, 200px); text-align: center;
+}
+.etape--pic   .etape__texte { bottom: 34px; }
+.etape--creux .etape__texte { top: 34px; }
+
+.etape__periode    { font-family: var(--font-titre); font-weight: 700; font-size: .74rem; color: var(--bleu); }
+.etape__poste       {
+  font-family: var(--font-titre); font-weight: 700; font-size: .86rem; color: var(--encre);
+  margin-top: .12rem; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.etape__entreprise  { display: block; margin-top: .12rem; font-family: var(--font-titre); font-weight: 700; font-size: .76rem; color: var(--navy); }
+.etape__lieu        { margin-top: .05rem; font-size: .68rem; color: var(--texte-doux); }
+.etape__desc        { display: none; }   /* détail complet réservé au mobile (voir responsive) — repris dans la modale sur desktop */
+
+/* --- Modale de détail (clic sur une pastille) — réutilise .expertise-modal*
+   (même structure/CSS que la modale Expertise, voir js/script.js). --- */
+.parcours-modal__logo {
+  /* Ancré en absolu (comme .expertise-modal__close) plutôt qu'en flux :
+     le padding du panneau varie avec clamp() selon la hauteur d'écran,
+     un positionnement en flux finissait par passer SOUS la croix de
+     fermeture sur certaines résolutions. En absolu, la position ne
+     dépend plus de ce padding — garantit un dégagement constant. */
+  position: absolute;
+  top: 1rem; inset-inline-end: 4rem;
+  display: flex; align-items: center; justify-content: center;
+  width: 68px; height: 46px;
+  background: var(--blanc); border-radius: 10px;
+  box-shadow: var(--ombre);
+  padding: .35rem .55rem;
+}
+.parcours-modal__logo:empty { display: none; }
+.parcours-modal__logoImg { max-width: 100%; max-height: 100%; object-fit: contain; }
+.parcours-modal__logo:has(.parcours-modal__logoMono) { background: var(--bleu); }
+.parcours-modal__logoMono {
+  font-family: var(--font-titre); font-weight: 800; font-size: 1rem;
+  color: #fff; letter-spacing: .01em;
+}
+.parcours-modal__periode { font-family: var(--font-titre); font-weight: 700; font-size: .82rem; color: var(--bleu); margin-bottom: .3rem; }
+.parcours-modal__meta    { font-family: var(--font-titre); font-weight: 700; font-size: .92rem; color: var(--navy); margin-bottom: 1.5rem; }
+.parcours-modal__meta span { display: block; margin-top: .15rem; font-family: var(--font-corps); font-weight: 500; font-size: .82rem; color: var(--texte-doux); }
+.expertise-modal__panel--navy .parcours-modal__periode { color: var(--sur-navy-doux); }
+.expertise-modal__panel--navy .parcours-modal__meta { color: #fff; }
+.expertise-modal__panel--navy .parcours-modal__meta span { color: var(--sur-navy); }
+
+
+/* =====================================================================
+   09. RÉALISATIONS — carrousel de cartes (vignette photo + texte)
+   ---------------------------------------------------------------------
+   Rangée de cartes défilant horizontalement en scroll-snap natif (swipe
+   tactile / trackpad / molette + Maj — fonctionne sans JS). Le bouton
+   rond « suivant » (posé par script.js, confort) avance d'une carte et
+   boucle en fin de piste. Chaque carte apparaît en fondu-décalé au
+   scroll (`.reveal`), avec un léger effet cascade carte après carte.
+   La photo de chaque projet est une VIGNETTE contenue en haut de carte
+   (hauteur fixe, coins arrondis) — le texte reste sur le fond uni du
+   site en dessous, lisible quel que soit le contenu de la photo (les
+   visuels fournis sont des captures/diagrammes, pas des photos « à
+   ambiance » : les mettre en fond plein écran derrière le texte les
+   rendait illisibles, essayé puis abandonné — voir CONTEXTE.md).
+   ===================================================================== */
+
+/* En-tête « bandeau fiche » : eyebrow en pastille, titre et description
+   empilés dans un seul bloc gauche — lu comme l'en-tête d'une fiche
+   projet plutôt qu'un split titre/description en 2 colonnes. */
+.section-head--fiche { display: flex; flex-direction: column; align-items: flex-start; gap: .6rem; }
+.section-head--fiche h2 { margin: 0; }
+.section-head--fiche p:not(.section-eyebrow) { max-width: 46ch; margin: 0; }
+.section-eyebrow--badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 0;
+  padding: .35rem .9rem;
+  background: var(--gris-carte);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-pill);
+  color: var(--bleu);
+}
+.section-eyebrow--badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bleu);
+}
+
+.realisations__carousel { position: relative; width: 100%; }
+
+.carousel__track {
+  --gap: clamp(1rem, 2.5vw, 1.75rem);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 2 * var(--gap)) / 3);
+  gap: var(--gap);
+  overflow-x: auto;
+  /* Piège CSS : `overflow-x` seul sans `overflow-y` explicite se calcule en
+     `auto` (pas `visible`) — la piste devenait scrollable verticalement sur
+     ~23px (son padding interne), qui captait la molette au lieu de la page. */
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: clamp(1rem, 4vw, 1.5cm);
+  padding-block: .35rem;
+  scrollbar-width: none;
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+
+.realisations__carousel .projet {
+  scroll-snap-align: start;
+  display: flex; flex-direction: column;
+  height: clamp(300px, 44vh, 420px);
+  background: var(--blanc);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-lg);
+  overflow: hidden;
+  box-shadow: var(--ombre);
+}
+.realisations__carousel .projet__media {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;   /* borne le zoom/déplacement (tweak) à la zone image, sans déborder sur le texte */
+}
+.realisations__carousel .projet__media img {
+  /* `contain` (pas `cover`) : l'image ORIGINALE reste entière et visible par
+     défaut, jamais rognée avant même d'ouvrir le tweak — Sofian zoome/recadre
+     lui-même ensuite via la jauge T (Taille) du panneau « Réalisations ». */
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  transform-origin: center;
+}
+.realisations__carousel .projet__annee {
+  position: absolute; top: .75rem; left: .75rem;
+  padding: .25rem .65rem;
+  border-radius: var(--rayon-pill);
+  background: rgba(11, 18, 32, .6);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  color: var(--blanc);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .74rem;
+}
+.realisations__carousel .projet__bottom {
+  /* Hauteur pilotée par le contenu (+ ce padding, identique sur toutes les
+     cartes) — pas par un flex:1 centré, qui donnait un espace en haut/bas
+     du texte variable selon la longueur du titre/de la description d'une
+     carte à l'autre. L'image (`.projet__media`, flex:1) absorbe le reste
+     de la hauteur disponible. */
+  flex: 0 0 auto;
+  display: flex; flex-direction: column;
+  gap: .35rem;
+  padding: clamp(1.1rem, 2.4vh, 1.5rem) clamp(1.1rem, 2.6vw, 1.6rem);
+}
+.realisations__carousel .projet__cat { margin: 0; font-size: .78rem; font-weight: 600; letter-spacing: .04em; color: var(--bleu); }
+.realisations__carousel .projet h3 {
+  margin: 0; color: var(--encre); font-size: clamp(1rem, 1.8vh, 1.2rem);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.realisations__carousel .projet h3 + p {
+  margin: 0; color: var(--texte-doux); font-size: .86rem; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Une carte sur deux : fond du bloc texte en bleu marine (même dégradé que
+   le widget Parcours/Expertise) — titre + description en blanc, catégorie
+   en jaune orangé (le bleu d'origine ne ressortait pas assez sur le marine). */
+.realisations__carousel .projet:nth-child(odd) .projet__bottom {
+  background: linear-gradient(135deg, var(--navy), var(--bleu-fonce));
+}
+.realisations__carousel .projet:nth-child(odd) .projet__cat { color: #fbbf24; }
+.realisations__carousel .projet:nth-child(odd) h3 { color: var(--blanc); }
+.realisations__carousel .projet:nth-child(odd) h3 + p { color: var(--sur-navy); }
+
+/* Pas d'animation d'apparition au swipe : les cartes sont visibles directement (la classe
+   `reveal` a été retirée des `.projet` dans index.html, à la demande de Sofian). */
+
+/* Bouton « suivant » — cercle flottant au bord droit (façon shadcn/ui Carousel). */
+.carousel__next {
+  position: absolute; right: clamp(.4rem, 1.5vw, 1rem); top: 50%;
+  translate: 0 -50%;
+  scale: 1;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 1px solid var(--bordure);
+  background: rgba(255, 255, 255, .85);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  color: var(--encre);
+  cursor: pointer;
+  box-shadow: var(--ombre);
+  transition: background var(--transition), scale var(--transition), box-shadow var(--transition);
+}
+.carousel__next svg { width: 18px; height: 18px; }
+.carousel__next:hover { background: var(--blanc); scale: 1.08; box-shadow: var(--ombre-forte); }
+.carousel__next:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel__track { scroll-behavior: auto; }
+}
+
+
+/* =====================================================================
+   10. FORMATION
+   Visuel campus + logo à gauche, cartes diplômes à droite (même
+   logique en deux colonnes que le bloc À PROPOS).
+   ===================================================================== */
+.formation__layout {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+/* En-tête « marge annotée » : titre pleine largeur à gauche ; eyebrow +
+   description groupés à droite dans une marge haut-alignée (au lieu du
+   split bas-aligné par défaut). */
+.section-head--marge { grid-template-columns: 1fr .5fr; align-items: start; }
+.section-head--marge h2 { margin: 0; }
+.section-head__marge {
+  border-left: 2px solid var(--bordure);
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.section-head--marge .section-eyebrow { margin-bottom: 0; }
+.formation__visuel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 68vh;
+}
+/* --- Carousel 3D (cylindre de photos, glisser pour tourner, clic pour zoomer) --- */
+.carousel3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--rayon-lg);
+  overflow: hidden;
+}
+.carousel3d__stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Décalage droite/bas de la composition via padding (PAS transform :
+     un transform posé sur l'élément qui porte perspective force le
+     navigateur à rastériser toute la scène 3D — photos comprises — en
+     texture, ce qui les rendait floues). */
+  padding: 28px 0 0 36px;
+  perspective: 1200px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+.carousel3d__stage:active { cursor: grabbing; }
+.carousel3d__track {
+  position: relative;
+  flex-shrink: 0;
+  height: 78%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+}
+.carousel3d__face {
+  position: absolute;
+  top: 0; left: 50%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .4rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.carousel3d__face img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+  pointer-events: none;
+  display: block;
+  transition: filter .25s ease;
+}
+.carousel3d__face:hover img { filter: brightness(1.05); }
+.carousel3d__caption {
+  /* Hors du cylindre 3D (texte nettement plus net qu'attaché à une face
+     tournante), collée à la photo actuellement de face via un `transform`
+     calculé en JS à chaque frame (translate = accéléré GPU, contrairement
+     à left/top/bottom/right qui redéclenchent un calcul de mise en page
+     à chaque image et donnaient un suivi saccadé). Position de base
+     left:0/top:0 neutre, tout se joue dans le transform. */
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: calc(100% - 2rem);
+  padding: .4rem .9rem;
+  border-radius: var(--rayon-pill);
+  background: rgba(8, 12, 24, .85);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+  will-change: transform;
+}
+.carousel3d__hint {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(8, 12, 24, .85);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+  will-change: transform;
+}
+.carousel3d__hint svg { width: 18px; height: 18px; }
+
+.carousel3d__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: rgba(8, 12, 24, .78);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.carousel3d__lightbox[hidden] { display: none; }
+.carousel3d__lightbox.is-open { opacity: 1; }
+.carousel3d__lightboxCard {
+  display: flex;
+  max-width: min(92vw, 1200px);
+  max-height: 88vh;
+  background: var(--blanc);
+  border-radius: var(--rayon-lg);
+  box-shadow: var(--ombre-forte);
+  overflow: hidden;
+  transform: scale(.92);
+  transition: transform .35s cubic-bezier(.16,1,.3,1);
+}
+.carousel3d__lightbox.is-open .carousel3d__lightboxCard { transform: scale(1); }
+.carousel3d__lightboxImg {
+  width: min(58vw, 700px);
+  /* Ratio fixe (photo « Atelier », 1508×1043) : même taille de popup à
+     chaque fois, quelle que soit la photo réellement affichée (certaines
+     sont natives portrait, ex. la façade en 1023×1537, ce qui donnait
+     avant une hauteur de popup très différente selon l'image). */
+  aspect-ratio: 1508 / 1043;
+  max-height: 88vh;
+  object-fit: cover;
+  display: block;
+}
+.carousel3d__lightboxText {
+  width: min(30vw, 340px);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .6rem;
+}
+.carousel3d__lightboxCaption {
+  font-family: var(--font-titre);
+  font-weight: 700;
+  font-size: .8rem;
+  color: var(--bleu);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.carousel3d__lightboxTitle { font-size: var(--pas-h3); color: var(--encre); }
+.carousel3d__lightboxDesc { color: var(--texte-doux); font-size: .95rem; line-height: 1.5; }
+.carousel3d__lightboxClose {
+  position: absolute;
+  top: 2rem; right: 2rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.carousel3d__lightboxClose:hover { background: rgba(255, 255, 255, .22); }
+.carousel3d__lightboxClose svg { width: 22px; height: 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel3d__track,
+  .carousel3d__lightbox,
+  .carousel3d__lightboxImg { transition: none !important; }
+}
+
+.formation__badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #fff;
+  border-radius: var(--rayon);
+  padding: .5rem .6rem;
+  /* Rendu « carte relevée » : ombre resserrée autour de la carte (pas
+     projetée loin vers le bas — se rapprochait trop des photos juste en
+     dessous) + reflets internes haut/bas (biseau) — même technique que le
+     liquid-glass des boutons (.btn--primaire), en dosage plus léger. */
+  box-shadow:
+    0 6px 14px -6px rgba(16, 37, 87, .3),
+    0 2px 5px -1px rgba(16, 37, 87, .18),
+    inset 1px 1px 1px rgba(255, 255, 255, .8),
+    inset -1px -1px 2px rgba(16, 37, 87, .1);
+  border: 1px solid rgba(16, 37, 87, .06);
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+.formation__badge img { width: 78px; height: auto; display: block; }
+
+.formation__grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+}
+.diplome {
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: clamp(1rem, 2vh, 1.6rem);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.diplome:hover { transform: translateY(-4px); box-shadow: var(--ombre); }
+.diplome[data-carousel-target] { cursor: pointer; }
+.diplome[data-carousel-target]:focus-visible { outline: 2px solid var(--bleu); outline-offset: 3px; }
+.diplome__annee { font-family: var(--font-titre); font-weight: 700; color: var(--bleu); font-size: .9rem; margin-bottom: .8rem; }
+.diplome h3 { font-size: var(--pas-h3); margin-bottom: .4rem; }
+.diplome p  { color: var(--texte-doux); font-size: .95rem; }
+
+
+/* =====================================================================
+   11. CONTACT — bannière (façon « Let's Build… » des captures)
+   ===================================================================== */
+.contact__banniere {
+  position: relative;
+  border-radius: var(--rayon-lg);
+  overflow: hidden;
+  padding: clamp(2.5rem, 6vw, 5rem);
+  background: linear-gradient(150deg, var(--ciel-clair), var(--ciel));
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: var(--esp-4);
+  align-items: center;
+}
+.contact__banniere::before {              /* même motif de grille subtil      */
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(29,78,216,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29,78,216,.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.contact__banniere > * { position: relative; z-index: 1; }
+.contact__titre { font-size: var(--pas-h2); margin-bottom: var(--esp-3); }
+.contact__titre em { color: var(--bleu); font-style: italic; }
+.contact__texte { color: var(--texte); max-width: 44ch; margin-bottom: var(--esp-4); }
+.contact__coords { display: flex; flex-direction: column; gap: var(--esp-2); }
+.contact__coord {
+  display: flex; align-items: center; gap: .8rem;
+  font-family: var(--font-titre); font-weight: 600; color: var(--navy);
+}
+.contact__coord svg { width: 20px; height: 20px; color: var(--bleu); flex-shrink: 0; }
+.contact__coord a:hover { color: var(--bleu); }
+
+
+/* =====================================================================
+   12. FOOTER — navy, bandeau visuel (nom de marque + portrait détouré)
+   ===================================================================== */
+.footer {
+  position: relative;
+  /* Haut BLANC (bandeau bleu ciel posé dessus). Le fond BLEU FONCÉ (à partir de ~55%,
+     sous le bandeau) est dessiné par ::before pour pouvoir ARRONDIR ses coins hauts. */
+  background: #fff;
+  color: var(--sur-navy);
+  justify-content: space-between;
+  padding-top: clamp(88px, 11vh, 120px);    /* min sous la nav (le bloc est ensuite centré/descendu) */
+  padding-bottom: clamp(1rem, 2.5vh, 1.75rem);
+}
+/* Fond BLEU FONCÉ du footer, dessiné à part → coins hauts légèrement arrondis.
+   Va de ~55% jusqu'au bas ; se prolonge dans .footer-sign (même navy). */
+/* Élément RÉEL (plus un ::before) pour pouvoir régler sa limite haute via l'éditeur
+   de tweaks (data-tw="footer-split", contrôle Y uniquement — voir tweaks.js). */
+.footer__navy {
+  position: absolute; left: 0; right: 0; top: 62%; bottom: 0;   /* repli MOBILE (top:%) ; en desktop il est ancré EN BAS — voir @media ci-dessous + tweaks.js */
+  background: linear-gradient(180deg, #17306e, #0c1c47);
+  border-radius: 22px 22px 0 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Le conteneur du footer remplit la hauteur, au-dessus du filigrane. */
+.footer > .conteneur {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* =====================================================================
+   SIGNATURE — zone EXCEPTIONNELLE après le footer (hors zone verte) :
+   grand nom de famille « CHTIOUI » en ENTIER + copyright dessous.
+   Fond navy dans la continuité du bas du footer. */
+.footer-sign {
+  background: #0c1c47;                       /* continue le navy du bas du footer */
+  text-align: center;
+  /* Zone compacte : le nom vient JUSTE après le footer, copyright juste dessous.
+     Padding en rem FIXE (pas vh) : le vh dépend de la hauteur de la fenêtre, qui change
+     entre F11 et non-F11 (barre d'adresse en moins) → l'espace autour du filigrane
+     bougeait visiblement d'un mode à l'autre. */
+  padding: 1.75rem 1rem 2.25rem;
+  overflow: hidden;                          /* garde-fou : pas de scroll horizontal */
+}
+/* Grand nom de famille, en entier (plus coupé), intégré au fond (réf. « ETHAN »). */
+.footer__watermark {
+  display: block; text-align: center;
+  font-family: var(--font-titre); font-weight: 800;
+  font-size: clamp(2.75rem, 19vw, 24rem);    /* GRAND (~86% de large, non coupé) — ajustable via tweak (Taille) */
+  line-height: .85; letter-spacing: .04em;   /* espacement ajustable via tweak (LS) */
+  text-transform: uppercase;                 /* affiché en MAJUSCULES */
+  color: rgba(255, 255, 255, .10);           /* pâle sur le navy (un peu plus clair) */
+  white-space: nowrap; pointer-events: none; user-select: none;
+}
+
+/* Bandeau visuel : panneau bleu profond, nom de marque + portrait détouré.
+   Le panneau coloré (::before) est seul à être arrondi + rogné ; la photo
+   est un enfant direct de .footer__banner (pas d'overflow:hidden dessus)
+   pour pouvoir dépasser librement au-dessus, sur le fond blanc — comme
+   la référence IDCA — au lieu d'être coupée. */
+/* Bloc « bandeau + colonnes » déplaçable d'un seul tweak (data-tw="footer-block").
+   margin-top = position verticale par défaut ; le tweak ajuste ensuite. */
+.footer__block { margin-top: clamp(20px, 3vh, 44px); }   /* compacté vers le haut → libère le bas pour le filigrane */
+
+.footer__banner {
+  position: relative;
+  height: clamp(200px, 31vh, 390px);        /* bandeau agrandi (plus de place dans le blanc), prudent sur écrans courts */
+  margin-bottom: clamp(1rem, 2.2vh, 2rem);
+}
+.footer__banner::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: var(--rayon-lg);
+  background: linear-gradient(135deg, var(--ciel-clair), var(--ciel));   /* bleu ciel */
+  z-index: 0;
+}
+.footer__bannerName {
+  position: absolute; inset: 0;
+  display: flex; align-items: center;
+  padding-inline: clamp(1.5rem, 5vw, 4rem);
+  font-family: var(--font-titre); font-weight: 800;
+  font-size: clamp(32px, 6.2vw, 92px);       /* réduit + 2 lignes (via <br>) : "Réseau & Datacenter" ne tient pas sur une ligne sans chevaucher le portrait */
+  line-height: .95; letter-spacing: -.03em;
+  color: var(--navy);                       /* texte bleu marine sur le bandeau bleu ciel */
+  white-space: nowrap; user-select: none;
+  z-index: 2;
+}
+.footer__bannerPhoto {
+  position: absolute; bottom: 0; right: clamp(1rem, 4vw, 3rem);
+  width: clamp(230px, 28vw, 400px);
+  height: auto;
+  max-height: calc(100% + 45px);
+  object-fit: contain; object-position: bottom;
+  display: block;
+  z-index: 1;
+  filter: drop-shadow(0 12px 22px rgba(10, 26, 64, .26));
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.3fr .8fr 1.15fr;   /* marque · liens · contact */
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+  padding-bottom: clamp(1.25rem, 3vh, 2rem);
+}
+
+/* --- Colonne gauche : bloc marque (façon Graphy) ------------------- */
+.footer__brandName {
+  display: inline-block;
+  font-family: var(--font-titre); font-weight: 800; font-size: 1.35rem;
+  letter-spacing: -.02em; color: #fff;
+}
+.footer__brandName span { color: #60a5fa; }
+.footer__brandDesc {
+  color: var(--sur-navy); font-size: .9rem; line-height: 1.55;
+  max-width: 38ch; margin: .8rem 0 1.1rem;
+}
+
+/* --- Colonne droite : bloc « Restons en contact » (façon image 1) -- */
+.footer__subscribe h4 {
+  color: #fff; font-size: .95rem; margin-bottom: .45rem;
+  font-family: var(--font-titre); font-weight: 700;
+}
+.footer__subText { color: var(--sur-navy); font-size: .9rem; margin-bottom: .9rem; max-width: 32ch; }
+.footer__subForm { display: flex; gap: .5rem; flex-wrap: wrap; }
+.footer__subInput {
+  flex: 1 1 160px; min-width: 0;
+  padding: .7rem 1.1rem;
+  border: 1px solid var(--bordure); border-radius: var(--rayon-pill);
+  background: #fff; font-family: var(--font-corps); font-size: .9rem; color: var(--encre);
+  transition: border-color var(--transition);
+}
+.footer__subInput::placeholder { color: var(--texte-doux); }
+.footer__subInput:focus { outline: none; border-color: var(--bleu); }
+.footer__subBtn { padding: .7rem 1.35rem; font-size: .9rem; flex: 0 0 auto; }
+.footer__subFine { color: var(--sur-navy-doux); font-size: .78rem; margin-top: .7rem; }
+.footer__talk { font-family: var(--font-titre); font-weight: 800; font-size: 1.6rem; color: var(--encre); line-height: 1.25; }
+.footer__talk a { color: var(--encre); }
+.footer__talk a:hover { color: var(--bleu); }
+.footer__socials { display: flex; gap: .6rem; margin-top: var(--esp-4); }
+.footer__socials a {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .18);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition), transform var(--transition);
+}
+.footer__socials a:hover { background: var(--bleu); transform: translateY(-3px); border-color: transparent; }
+.footer__socials svg { width: 18px; height: 18px; color: #fff; transition: color var(--transition); }
+.footer__col h4 {
+  color: #fff; font-size: .95rem; margin-bottom: var(--esp-3);
+  font-family: var(--font-titre); font-weight: 700;
+}
+.footer__col li { margin-bottom: .7rem; }
+.footer__col a { color: var(--sur-navy-doux); font-size: .92rem; transition: color var(--transition); }
+.footer__col a:hover { color: #fff; }
+
+.footer__bottom {
+  margin-top: 2.25rem;  /* juste sous le filigrane (rem fixe : stable entre F11 et non-F11) */
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: .65rem 0 0;  /* barre plus fine */
+  /* ligne de séparation retirée à la demande de Sofian */
+  font-size: .8rem; color: var(--sur-navy-doux);
+}
+.footer__bottom a:hover { color: #fff; }
+
+
+/* =====================================================================
+   13. LOGOS — bandeau « Ils m'ont fait confiance »
+   Même traitement que le bandeau clients du site IDCA : gros titre,
+   défilement infini (marquee) avec fondu sur les bords, ralenti au survol.
+   Le JS ajoute .is-marquee (progressive enhancement) ; sans JS, la liste
+   reste visible en grille statique centrée.
+   Logos en niveaux de gris (uniformise des qualités différentes),
+   couleur au survol.
+   ===================================================================== */
+.logos { padding-block: var(--section-y); }
+/* COMPACTE (idem Stats) : hauteur du contenu, padding haut = bas (symétrie). */
+section.logos { min-height: auto; }
+.logos__titre {
+  text-align: center;
+  font-family: var(--font-titre); font-weight: 800;
+  font-size: var(--pas-h2); letter-spacing: -.02em;
+  color: var(--encre);
+  margin-bottom: var(--esp-8);
+}
+.logos__viewport {
+  position: relative;
+  overflow: hidden;
+}
+.logos__viewport.is-marquee {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+.logos__track {
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: clamp(1.5rem, 5vw, 4rem);
+  padding-inline: var(--esp-4);
+}
+.logos__track.is-marquee {
+  flex-wrap: nowrap;
+  width: max-content;
+  justify-content: flex-start;
+  will-change: transform;
+}
+.logos__item {
+  display: flex; align-items: center; justify-content: center;
+  height: 96px;
+  flex-shrink: 0;
+}
+.logos__track.is-marquee .logos__item { margin-inline: clamp(1.25rem, 4vw, 3rem); }
+.logos__item img {
+  /* height (et non max-height) : force la mise à l'échelle même pour une
+     image plus petite que la boîte — sinon un favicon basse résolution
+     (ex. Generix, 32×32) s'affiche à sa taille native, minuscule à côté
+     des autres logos. object-fit préserve les proportions sans déformer. */
+  height: 100%; width: auto; max-width: 220px;
+  object-fit: contain;
+  opacity: .85;
+  transition: opacity var(--transition);
+}
+.logos__item img:hover { opacity: 1; }
+
+
+/* =====================================================================
+   14. INTERNATIONALISATION (i18n) — police arabe + sens RTL
+   Le JS pose lang="ar" + dir="rtl" sur <html> ; le CSS s'adapte ici.
+   ===================================================================== */
+/* Police adaptée à l'arabe (chargée dans le <head>). */
+html[lang="ar"] body,
+html[lang="ar"] h1, html[lang="ar"] h2,
+html[lang="ar"] h3, html[lang="ar"] h4 {
+  font-family: "Noto Sans Arabic", var(--font-corps);
+}
+/* En RTL, on inverse quelques alignements pensés pour la lecture gauche→droite. */
+[dir="rtl"] .section-head p { margin-inline-start: auto; }
+[dir="rtl"] .lang__menu { right: auto; left: 0; }
+[dir="rtl"] .apropos__points li { flex-direction: row-reverse; justify-content: flex-end; }
+[dir="rtl"] .contact__coord { flex-direction: row-reverse; justify-content: flex-end; text-align: right; }
+[dir="rtl"] .hero__ghost { direction: ltr; }        /* mots-signature restent lisibles */
+/* Nom géant du Hero (« FETHI CHTIOUI ») : latin → doit rester en LTR (sinon décalé/illisible
+   en RTL). Position identique au FR/EN (on ne miroir­e pas ce nom, c'est du texte latin).
+   `font-family` re-forcée sur `var(--font-titre)` (Plus Jakarta Sans) car la règle
+   `html[lang="ar"] h1` (plus bas) bascule TOUS les h1 en « Noto Sans Arabic » — parfait pour
+   les titres arabes, mais ce nom est latin : sans ça il changeait de police/graisse/largeur
+   entre FR et AR (glyphes plus larges, gap plus grand). Spécificité (0,2,0) > la règle
+   AR (0,1,2), donc gagne ; les <span> héritent. La variable --font-titre reste latine en AR. */
+[dir="rtl"] .hero3__ghost { direction: ltr; font-family: var(--font-titre); }
+/* Repli des logos clients (Hero) : en RTL le bouton chevron est à GAUCHE du groupe → le groupe
+   doit se replier vers la gauche (vers le bouton), pas vers la droite. */
+[dir="rtl"] .hero3__logosGroup { transform-origin: left center; }
+/* Bandeau marquee « Ils m'ont fait confiance » : on force le VIEWPORT en LTR (pas juste la
+   piste) → la piste se positionne comme en FR/EN et la logique de défilement infini
+   (duplication + translateX) fonctionne à l'identique. Sinon, en RTL les logos débordent
+   vers la gauche et le viewport se vide (aucun logo visible). Le titre (hors viewport)
+   reste en arabe RTL. Logos = images → LTR sans souci. */
+[dir="rtl"] .logos__viewport { direction: ltr; }
+/* Bandeau « 3I digital » du footer : la photo est ancrée à droite (`right:`) en LTR → en RTL
+   elle doit passer à GAUCHE (miroir). Le nom, lui, se cale déjà à droite via le flex (start). */
+[dir="rtl"] .footer__bannerPhoto { right: auto; left: clamp(1rem, 4vw, 3rem); }
+
+
+/* =====================================================================
+   RESPONSIVE — approche « desktop-first » adaptée ici : on part de la
+   grille large, puis on simplifie aux points de rupture tablette/mobile.
+   (Pour un nouveau projet, l'approche mobile-first — min-width — est
+   souvent préférable ; voir 04-PROJET/05-PORTFOLIO-FETHI/01-guide.md.)
+   ===================================================================== */
+
+/* --- Tablette (≤ 900px) ------------------------------------------- */
+@media (max-width: 900px) {
+  .section-head { grid-template-columns: 1fr; align-items: start; }
+  /* Parcours → la voie courbée se replie en simple liste verticale */
+  .parcours-voie {
+    height: auto; max-width: 560px; margin-block: var(--esp-2) 0;
+    display: flex; flex-direction: column;
+  }
+  .parcours-voie__trace { display: none; }
+  .etape {
+    position: static; width: 100%; height: auto;
+    display: flex; align-items: flex-start; gap: var(--esp-2);
+    padding-block: clamp(.5rem, 1.5vh, .8rem);
+    border-bottom: 1px solid var(--bordure);
+  }
+  .etape:last-child { border-bottom: none; }
+  .etape__pastille { position: static; transform: none; flex: none; }
+  .etape__pastille:hover,
+  .etape__pastille:focus-visible { transform: scale(1.08); }
+  .etape--actuel .etape__pastille { width: 44px; height: 44px; }
+  .etape__texte { position: static; transform: none; width: auto; text-align: left; }
+  .etape__poste { -webkit-line-clamp: unset; }
+  .etape__desc { display: block; color: var(--texte-doux); font-size: .82rem; margin-top: .25rem; }
+
+  /* Hero 3 passe d'une grille 3 colonnes à une pile centrée et compacte
+     (hauteur non figée : min-height seulement, pour ne jamais couper de
+     contenu si tout ne tient pas exactement dans un écran mobile). Le nom
+     géant redevient un vrai titre visible (plus un fond décoratif : pas
+     la place, en 1 colonne, de le faire « dépasser » derrière la photo). */
+  .hero3 { height: auto; min-height: calc(100dvh - 90px); padding-block: var(--esp-2); }
+  .hero3__main {
+    min-height: 0;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; row-gap: var(--esp-2); padding-block: 0;
+  }
+  .hero3__ghost {
+    order: -2; white-space: normal;
+    font-size: clamp(2.4rem, 12vw, 3.8rem); margin-bottom: var(--esp-1);
+  }
+  /* Bulle « Discutons ensemble » déplacée TOUT EN BAS du hero (après la roue + les
+     logos clients), donc juste au-dessus des chiffres clés. order:2 > side(order:1). */
+  .hero3__intro { order: 2; max-width: 42ch; align-self: center; align-items: center; gap: .6rem; margin-top: var(--esp-1); }
+  .hero3__eyebrow { font-size: .74rem; }
+  .hero3__photo { order: 0; height: 30vh; width: auto; max-width: 320px; margin-inline: auto; }
+  .hero3__side { order: 1; align-self: center; align-items: center; gap: 1.25rem; }
+  .hero3__wheel { width: min(280px, 78vw); height: 104px; }
+  .hero3__wheelItem { text-align: center; font-size: .85rem; }
+  .hero3__wheelItem.is-actif { font-size: .98rem; }
+  .hero3__logos { align-items: center; }
+  .hero3__logosRow { justify-content: center; }
+
+  .apropos__grid { grid-template-columns: 1fr; }
+  .carousel__track { grid-auto-columns: calc((100% - var(--gap)) / 2); }
+  .formation__layout { grid-template-columns: 1fr; }
+  .formation__visuel { aspect-ratio: 4 / 3; max-width: 480px; margin-inline: auto; }
+  .contact__banniere { grid-template-columns: 1fr; }
+  .footer__grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* --- Mobile (≤ 720px) — le menu de liens passe en burger ---------- */
+@media (max-width: 720px) {
+  .nav__burger { display: flex; }
+  /* Les liens quittent la pilule pour un panneau déroulant flottant. */
+  .nav__menu {
+    position: fixed;
+    inset: 92px 1rem auto 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--esp-2);
+    background: rgba(255, 255, 255, .97);
+    backdrop-filter: blur(14px);
+    padding: var(--esp-3);
+    border: 1px solid var(--bordure);
+    border-radius: 18px;
+    box-shadow: var(--ombre-forte);
+    opacity: 0; visibility: hidden; transform: translateY(-12px);
+    transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  }
+  .nav__menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+  /* Burger animé en croix quand le menu est ouvert. */
+  .nav__burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav__burger.open span:nth-child(2) { opacity: 0; }
+  .nav__burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Dans la pilule on ne garde que la langue ; le CTA passe dans le hero. */
+  .nav__actions .btn--primaire { display: none; }
+  /* .nav__menu passe en position:fixed (hors flux) : il ne reste que logo/actions/burger
+     dans le flex. Sans ceci, justify-content:space-between du .nav répartirait ces 3
+     blocs à distance égale → la langue se retrouve au milieu au lieu de coller au burger. */
+  .nav__actions { margin-left: auto; }
+}
+
+/* --- Mobile (≤ 640px) --------------------------------------------- */
+@media (max-width: 640px) {
+  /* Sur mobile, on empile presque tout en une colonne. */
+  /* Fin du « plein écran par section » (chaque section = 1 écran) sur mobile :
+     hauteur = contenu → supprime les grands vides blancs entre sections. Un peu
+     plus d'air via le padding pour garder une respiration correcte. */
+  section:not(.hero) { min-height: auto; }
+  .section { padding-block: clamp(2rem, 7vw, 3.25rem); }
+
+  /* Hero (phones) : citation « Bonjour » + CTA « Discutons ensemble » MASQUÉS sur
+     mobile (choix de Sofian) → le hero se limite au nom + portrait + roue + logos. */
+  .hero3__intro { display: none; }
+  /* Contenu du hero descendu (plus d'air sous le menu) + hauteur = contenu
+     (supprime le grand vide avant les chiffres clés). La SECTION .hero est aussi
+     ramenée à `auto` (elle a un min-height:100dvh propre, hors règle globale). */
+  .hero { min-height: auto; }
+  .hero3 { min-height: auto; padding-block: clamp(2.5rem, 9vw, 4rem) clamp(1.25rem, 4vw, 2rem); }
+
+  /* CTA « Me contacter » (section contact) en pleine largeur. */
+  [data-tw="contact-cta"] { width: 100%; justify-content: center; text-align: center; }
+
+  .hero__stats { grid-template-columns: repeat(2, 1fr); gap: var(--esp-6) var(--esp-3); }
+  /* En grille 2 colonnes, le séparateur vertical n'a plus de sens (ligne de grille cassée). */
+  .stat:not(:first-child)::before { display: none; }
+  /* Pastilles À propos → bande défilante continue (marquee). La série est dupliquée
+     (.is-clone) et on translate de -50% : boucle sans couture. Marges (pas gap) pour
+     que -50% tombe pile sur le début de la 2e série malgré des pastilles de largeurs
+     différentes. Masque en dégradé pour un fondu propre aux bords. */
+  .apropos__marquee {
+    display: block; overflow: hidden; width: 100%;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  }
+  .apropos__points {
+    flex-wrap: nowrap; justify-content: flex-start;
+    width: max-content; gap: 0;
+    animation: aproposDefile 24s linear infinite;
+  }
+  .apropos__points li { margin-inline-end: .7rem; }
+  .apropos__points li.is-clone { display: inline-flex; }
+  .carousel__track { grid-auto-columns: 84%; }
+  .carousel__next { width: 38px; height: 38px; }
+
+  /* --- Formation : carrousel 3D agrandi (carré plein largeur) + diplômes compactés --- */
+  .formation__visuel { max-width: none; aspect-ratio: 1 / 1; }
+  .diplome { padding: .85rem 1rem; }
+  .diplome__annee { font-size: .8rem; margin-bottom: .35rem; }
+  .diplome h3 { font-size: 1rem; margin-bottom: .3rem; }
+  .diplome p  { font-size: .85rem; }
+
+  /* --- Footer : refonte mobile. Tout le pied de page passe en NAVY plein (la bande
+     .footer__navy devient inutile) → le texte blanc (nom de marque, etc.) redevient
+     lisible : c'est ce qui corrige le « point bleu seul » (le nom blanc était invisible
+     sur le haut blanc, il ne restait que le « . » bleu). Hauteur = contenu (plus de
+     100dvh forcé), bandeau « 3I digital » + portrait redimensionnés. --- */
+  .footer { min-height: auto; background: #fff; padding-top: clamp(2.75rem, 11vw, 3.5rem); padding-bottom: 1.5rem; }
+  /* Haut du footer BLANC (le bandeau « 3I digital » repose dessus) ; le fond BLEU
+     FONCÉ commence SOUS le bandeau : top = padding-haut + hauteur du bandeau. */
+  .footer__navy { display: block; top: calc(clamp(2.75rem, 11vw, 3.5rem) + clamp(150px, 44vw, 230px) + clamp(3rem, 12vw, 3.5rem)); bottom: 0; height: auto; }
+  .footer__block { margin-top: 0; }
+  /* Espace BLANC ajouté sous le bandeau (le bandeau respire), avant le fond bleu.
+     La marge (blanche) est suivie du fond bleu dont le `top` inclut cette même marge. */
+  .footer__banner { height: clamp(150px, 44vw, 230px); margin-bottom: clamp(3rem, 12vw, 3.5rem); }
+  .footer__bannerName { font-size: clamp(26px, 8.5vw, 46px); padding-inline: 1.1rem; }
+  .footer__bannerPhoto { width: clamp(110px, 34vw, 165px); right: 1.75rem; max-height: calc(100% + 30px); }
+  /* Même espace en HAUT qu'en bas de la grille → de l'air (bleu) au-dessus du
+     bloc « Fethi.Chtioui / Directeur… ». */
+  .footer__grid { grid-template-columns: 1fr; gap: 2rem; padding-top: 1.25rem; padding-bottom: 1.25rem; }
+  /* « Restons en contact » (email) placé AU-DESSUS de « Liens rapides » (inversion). */
+  .footer__subscribe { order: 1; }
+  .footer__col { order: 2; }
+  .footer__brandDesc { max-width: none; }
+  .footer__subText { max-width: none; }
+  .footer__bottom { flex-direction: column; align-items: center; text-align: center; margin-top: 1.5rem; }
+  /* Filigrane « CHTIOUI » : bande DÉDIÉE PLUS GRANDE (min-height) où CHTIOUI est
+     VERTICALEMENT CENTRÉ (flex justify-center) ; le copyright est ancré en bas
+     (absolute) pour ne pas décaler le centrage. `line-height:1` → jamais rogné. */
+  .footer-sign {
+    padding-inline: .5rem; padding-top: 0; padding-bottom: clamp(1.5rem, 5vw, 2.5rem);
+    min-height: clamp(260px, 72vw, 340px);
+    position: relative; display: flex; flex-direction: column; justify-content: flex-start;
+  }
+  .footer__watermark { font-size: 20vw; line-height: 1; color: rgba(255, 255, 255, .26); }
+  .footer__bottom { position: absolute; left: 0; right: 0; bottom: clamp(.9rem, 3.5vw, 1.4rem); margin-top: 0; }
+
+  .carousel3d__lightboxCard { flex-direction: column; max-width: 92vw; max-height: 88vh; overflow-y: auto; }
+  .carousel3d__lightboxImg { width: 100%; max-height: 46vh; }
+  .carousel3d__lightboxText { width: 100%; }
+}
+
+/* Bande défilante À propos : repli SANS animation si l'utilisateur préfère moins de
+   mouvement (sinon la piste nowrap resterait figée et tronquée). */
+@media (prefers-reduced-motion: reduce) and (max-width: 640px) {
+  .apropos__marquee { overflow: visible; }
+  .apropos__points { animation: none; flex-wrap: wrap; width: auto; justify-content: center; gap: .7rem; }
+  .apropos__points li { margin-inline-end: 0; }
+  .apropos__points li.is-clone { display: none; }
+}
+
+
+/* Hero — en fenêtre COURTE uniquement (non-F11, hauteur ≤ 820px, desktop) : on remonte
+   SEULEMENT le bloc logos de 44px pour retrouver le même espace sous eux qu'en F11 (~88px).
+   `position:relative; top` = décalage VISUEL (l'espace d'origine est conservé) → ne bouge ni
+   la roue, ni le centrage de la colonne, et ne compose pas avec le tweak (translate) ni la
+   révélation (transform). En F11 (hauteur > 820px) cette règle ne s'applique pas → inchangé. */
+@media (min-width: 901px) and (max-height: 820px) {
+  .hero3__logos { position: relative; top: -44px; }
+  /* Footer, non-F11 uniquement : bandeau remonté de 30px de plus → équivaut à footer-banner
+     y:-140 en non-F11 (valeur choisie par Sofian), alors que F11 garde son y:-110 (parfait).
+     transform = visuel (composé avec le translate du tweak), ne bouge ni colonnes ni bloc bleu. */
+  .footer__banner { transform: translateY(-30px); }
+}
+
+/* =====================================================================
+   POSITIONS FIGÉES — décalages fins des éléments du Hero et du Footer,
+   réglés par Sofian puis inscrits ici en dur (l'éditeur de tweaks a été
+   retiré). Vue BUREAU uniquement (≥ 901px) pour préserver le mobile.
+   Propriété CSS `translate` (se compose avec l'animation `.reveal`).
+   ===================================================================== */
+@media (min-width: 901px) {
+  /* Décalages HORIZONTAUX remis à 0 : en pleine largeur, le conteneur pousse
+     déjà les éléments vers les bords (les x calibrés pour l'ancien 1200px
+     faisaient déborder). On conserve les décalages verticaux. */
+  [data-tw="navbar"]        { translate: 0 -8px; }
+  [data-tw="h3-ghost"]      { translate: -67px 40px; scale: .9; }
+  [data-tw="h3-lead"]       { translate: 3px 35px; padding: 20px; }
+  [data-tw="h3-cta"]        { translate: 4px 48px; }
+  [data-tw="h3-domaines"]   { translate: -5px 40px; }
+  [data-tw="h3-logos"]      { translate: -5px 115px; }
+  [data-tw="h3-photo"]      { scale: .9; }
+  /* Hero : intro (gauche) et côté (droite) restent CENTRÉS verticalement (align-self:center,
+     base) → en F11 (fenêtre plus haute) le contenu descend proportionnellement, ce qui évite
+     l'effet « trop haut » d'un ancrage figé. Le positionnement fin (baisser/monter les 2 blocs
+     ensemble en X/Y) se fait via le tweak « Blocs Bonjour+CTA & Domaines+Logos » (data-tw=h3-intro
+     posé sur .hero3__intro ET .hero3__side → un seul réglage les déplace ensemble). */
+  /* Stats : plus de translate ni d'ancrage — la section est désormais COMPACTE (hauteur du
+     contenu, voir section.stats-strip plus bas) avec padding haut = bas (symétrie). */
+  .parcours .section-head   { translate: 0 -90px; }        /* en-tête Parcours remonté (titre + intro) */
+  [data-tw="footer-block"]  { translate: 0 156px; }
+  [data-tw="footer-grid"]   { translate: 0 45px; }   /* repli statique (JS recentre dynamiquement par-dessus) */
+  [data-tw="footer-banner"] { translate: 0 -110px; scale: 1.15; }
+  [data-tw="footer-name"]   { translate: 46px 0; scale: 1.1; }     /* x=46 → bandeau VISUELLEMENT symétrique : marge de la personne visible = marge de « 3I digital » (71px de chaque côté). Tient compte du letterbox object-fit du portrait. */
+  [data-tw="footer-photo"]  { translate: 46px -12px; scale: 1.08; } /* idem : même décalage que le nom, miroir en RTL via tweaks.js */
+  [data-tw="footer-brand"]     { translate: 0 20px; }
+  [data-tw="footer-socials"]   { translate: 0 -10px; }
+  [data-tw="footer-links"]     { translate: 0 9px; }
+  [data-tw="footer-subscribe"] { translate: 0 10px; }
+  /* Espacements internes du footer, en desktop : basés sur vw (largeur), plus vh (hauteur).
+     Le vh dépend de la hauteur de FENÊTRE, qui change entre F11 et fenêtré (barre d'adresse
+     en moins) → les écarts sous les colonnes / au-dessus du filigrane rétrécissaient
+     visiblement hors plein écran. La largeur, elle, ne change PAS entre F11 et fenêtré sur un
+     même écran → base stable pour F11 = fenêtré, tout en restant adaptatif entre écrans
+     réellement différents (petit portable vs grand moniteur). Coefficients vw = coefficients
+     vh d'origine ÷ 1.778 (ratio 16:9), pour un rendu ~identique à l'ancien réglage en plein écran. */
+  .footer            { padding-top: clamp(88px, 6.2vw, 120px); padding-bottom: clamp(1rem, 1.4vw, 1.75rem); }
+  .footer__block     { margin-top: clamp(20px, 1.7vw, 44px); display: flex; flex-direction: column; flex: 1; }
+  .footer__banner    { height: clamp(200px, 17.4vw, 390px); margin-bottom: clamp(1rem, 1.24vw, 2rem); flex: 0 0 auto; }
+  .footer__grid      { padding-bottom: clamp(1.25rem, 1.7vw, 2rem); margin-top: auto; }   /* pousse les colonnes en bas du bloc → l'écart lié au 100dvh se loge entre le bandeau et les colonnes, pas sous la nav ni sous les colonnes */
+  /* Fond bleu ANCRÉ EN BAS (hauteur fixe depuis le bas), pas en top:%. Le footer fait 100dvh :
+     sa hauteur change entre F11 et fenêtré. Avec top:62% (proportionnel), le bleu ne suivait
+     que 62% de cette variation alors que les colonnes (margin-top:auto) suivent 100% du bas
+     → le bleu se désynchronisait du contenu (texte débordant sur le blanc hors F11). Ancré en
+     bas comme les colonnes, il suit exactement le même bord → écart bleu↔colonnes constant.
+     Repli JS-désactivé ; en JS actif, tweaks.js règle la hauteur (footer-split). */
+  .footer__navy      { top: auto; bottom: 0; height: 293px; }
+  /* Zone signature (en flux dans .footer-sign) — réglages figés de Sofian. */
+  [data-tw="footer-copy"]      { translate: 0 25px; }   /* copyright un chouïa plus bas */
+  [data-tw="footer-watermark"] { translate: 5px 0; scale: 1.11; }
+}
